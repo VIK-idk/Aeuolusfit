@@ -28,9 +28,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail, etPassword;
     private Button btnLogin, btnGoogle;
-    private TextView tvIrRegistro;
+    private TextView tvIrRegistroHeader, tvIrRegistroForm;
 
-    // Lanzador para el resultado de la ventana de Google
     private final ActivityResultLauncher<Intent> googleLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -52,24 +51,22 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-        // Inicializar Firebase
         auth = FirebaseAuth.getInstance();
 
-        // Vincular vistas
+        // Vincular vistas con los IDs exactos del XML
         etEmail = findViewById(R.id.etEmailLogin);
         etPassword = findViewById(R.id.etPasswordLogin);
         btnLogin = findViewById(R.id.btnLogin);
         btnGoogle = findViewById(R.id.btnGoogle);
-        tvIrRegistro = findViewById(R.id.tvIrRegistro);
+        tvIrRegistroHeader = findViewById(R.id.tvIrRegistroHeader);
+        tvIrRegistroForm = findViewById(R.id.tvIrRegistroForm);
 
-        // Configurar Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id)) // Se genera automáticamente si tienes el google-services.json
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        // Click en Iniciar Sesión con Correo
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -89,14 +86,17 @@ public class LoginActivity extends AppCompatActivity {
                     });
         });
 
-        // Click en Continuar con Google
         btnGoogle.setOnClickListener(v -> {
             Intent signInIntent = googleSignInClient.getSignInIntent();
             googleLauncher.launch(signInIntent);
         });
 
-        // Click en ir a Registro
-        tvIrRegistro.setOnClickListener(v -> {
+        // Configurar clics para ambos textos de registro
+        tvIrRegistroHeader.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        });
+
+        tvIrRegistroForm.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
         });
     }
@@ -114,16 +114,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void irPantallaPrincipal() {
-        // Cambia "MainActivity.class" por la pantalla a la que quieres ir tras loguearte
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
-        finish(); // Cierra el login para no volver atrás
+        finish();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Si el usuario ya está logueado, lo mandamos directo a la app
         if (auth.getCurrentUser() != null) {
             irPantallaPrincipal();
         }

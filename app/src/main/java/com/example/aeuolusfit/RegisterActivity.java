@@ -9,14 +9,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
 
-    private EditText etEmail, etPassword;
+    private EditText etNombre, etEmail, etPassword, etConfirmPassword;
     private Button btnRegister;
-    private TextView tvVolverLogin;
+    private TextView tvIrLoginHeader, tvVolverLoginForm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,18 +27,24 @@ public class RegisterActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
 
+        // Enlazar los IDs exactos de tu XML register
+        etNombre = findViewById(R.id.etNombreRegister);
         etEmail = findViewById(R.id.etEmailRegister);
         etPassword = findViewById(R.id.etPasswordRegister);
+        etConfirmPassword = findViewById(R.id.etConfirmPasswordRegister);
         btnRegister = findViewById(R.id.btnRegister);
-        tvVolverLogin = findViewById(R.id.tvVolverLogin);
+        tvIrLoginHeader = findViewById(R.id.tvIrLoginHeader);
+        tvVolverLoginForm = findViewById(R.id.tvVolverLoginForm);
 
         // Click en Registrar
         btnRegister.setOnClickListener(v -> {
+            String nombre = etNombre.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
+            String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Llena todos los campos", Toast.LENGTH_SHORT).show();
+            if (nombre.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(this, "Por favor, llena todos los campos", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -45,21 +53,33 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
+                            // Guardar el nombre en el perfil de Firebase del usuario
+                            FirebaseUser user = auth.getCurrentUser();
+                            if (user != null) {
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(nombre)
+                                        .build();
+                                user.updateProfile(profileUpdates);
+                            }
+
                             Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                            // Cerramos esta pantalla para que vuelva al Login automáticamente
-                            finish();
+                            finish(); // Vuelve al Login
                         } else {
                             Toast.makeText(this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
         });
 
-        // Click en volver al login
-        tvVolverLogin.setOnClickListener(v -> {
-            finish(); // Cierra esta pantalla y vuelve a la anterior (Login)
-        });
+        // Clics para volver al Login desde la cabecera o desde el formulario
+        tvIrLoginHeader.setOnClickListener(v -> finish());
+        tvVolverLoginForm.setOnClickListener(v -> finish());
     }
 }

@@ -5,5 +5,5 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.Aeuolusfit" parent="Base.Theme.Aeuolusfit" />
+    <style name="Theme.Aeuolusfit" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
 </resources>

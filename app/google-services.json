@@ -12,7 +12,20 @@
           "package_name": "com.example.aeuolusfit"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "935456978156-nf9uh5kpmi7a6b279q6g9asseth39841.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aeuolusfit",
+            "certificate_hash": "ff698fd198eab380090fd229d7963b966d6ae613"
+          }
+        },
+        {
+          "client_id": "935456978156-928pjnru1je8kokao9sra8e7ieb362f7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD9sTVj4wA-uUrmyLrCIIWMXpnwX52jhwo"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "935456978156-928pjnru1je8kokao9sra8e7ieb362f7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

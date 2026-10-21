@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation("com.google.firebase:firebase-firestore:24.10.0")
     implementation(platform("com.google.firebase:firebase-bom:35.0.2"))
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)

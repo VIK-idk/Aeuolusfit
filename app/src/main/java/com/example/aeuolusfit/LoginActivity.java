@@ -19,11 +19,18 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
+    private FirebaseFirestore db; // Añadimos Firestore
     private GoogleSignInClient googleSignInClient;
 
     private EditText etEmail, etPassword;
@@ -40,8 +47,10 @@ public class LoginActivity extends AppCompatActivity {
                         GoogleSignInAccount account = task.getResult(ApiException.class);
                         firebaseAuthWithGoogle(account.getIdToken());
                     } catch (ApiException e) {
-                        Toast.makeText(this, "Error de Google: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error de Google: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
+                } else {
+                    Toast.makeText(this, "Ventana de Google cerrada o fallida", Toast.LENGTH_SHORT).show();
                 }
             }
     );
@@ -52,8 +61,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.login);
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance(); // Inicializamos Firestore
 
-        // Vincular vistas con los IDs exactos del XML
         etEmail = findViewById(R.id.etEmailLogin);
         etPassword = findViewById(R.id.etPasswordLogin);
         btnLogin = findViewById(R.id.btnLogin);
@@ -67,6 +76,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
 
+        // Login con correo
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
@@ -86,19 +96,14 @@ public class LoginActivity extends AppCompatActivity {
                     });
         });
 
+        // Login con Google
         btnGoogle.setOnClickListener(v -> {
             Intent signInIntent = googleSignInClient.getSignInIntent();
             googleLauncher.launch(signInIntent);
         });
 
-        // Configurar clics para ambos textos de registro
-        tvIrRegistroHeader.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-        });
-
-        tvIrRegistroForm.setOnClickListener(v -> {
-            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-        });
+        tvIrRegistroHeader.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, RegisterActivity.class)));
+        tvIrRegistroForm.setOnClickListener(v -> startActivity(new Intent(LoginActivity.this, RegisterActivity.class)));
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
@@ -106,7 +111,24 @@ public class LoginActivity extends AppCompatActivity {
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        irPantallaPrincipal();
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user != null) {
+                            // Revisar si el usuario de Google ya existe en Firestore
+                            DocumentReference docRef = db.collection("usuarios").document(user.getUid());
+                            docRef.get().addOnCompleteListener(t -> {
+                                if (t.isSuccessful() && !t.getResult().exists()) {
+                                    // Es su primera vez, guardamos sus datos
+                                    Map<String, Object> userData = new HashMap<>();
+                                    userData.put("nombre", user.getDisplayName());
+                                    userData.put("email", user.getEmail());
+
+                                    docRef.set(userData).addOnCompleteListener(t2 -> irPantallaPrincipal());
+                                } else {
+                                    // Ya existía en la base de datos
+                                    irPantallaPrincipal();
+                                }
+                            });
+                        }
                     } else {
                         Toast.makeText(this, "Error autenticando con Firebase", Toast.LENGTH_SHORT).show();
                     }

@@ -11,10 +11,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
+    private FirebaseFirestore db; // Añadimos Firestore
 
     private EditText etNombre, etEmail, etPassword, etConfirmPassword;
     private Button btnRegister;
@@ -26,8 +31,8 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.register);
 
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance(); // Inicializamos Firestore
 
-        // Enlazar los IDs exactos de tu XML register
         etNombre = findViewById(R.id.etNombreRegister);
         etEmail = findViewById(R.id.etEmailRegister);
         etPassword = findViewById(R.id.etPasswordRegister);
@@ -36,7 +41,6 @@ public class RegisterActivity extends AppCompatActivity {
         tvIrLoginHeader = findViewById(R.id.tvIrLoginHeader);
         tvVolverLoginForm = findViewById(R.id.tvVolverLoginForm);
 
-        // Click en Registrar
         btnRegister.setOnClickListener(v -> {
             String nombre = etNombre.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
@@ -61,24 +65,35 @@ public class RegisterActivity extends AppCompatActivity {
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
-                            // Guardar el nombre en el perfil de Firebase del usuario
                             FirebaseUser user = auth.getCurrentUser();
                             if (user != null) {
+                                // 1. Guardar nombre en el perfil de Auth
                                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                         .setDisplayName(nombre)
                                         .build();
                                 user.updateProfile(profileUpdates);
-                            }
 
-                            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                            finish(); // Vuelve al Login
+                                // 2. Guardar datos en FIRESTORE
+                                Map<String, Object> userData = new HashMap<>();
+                                userData.put("nombre", nombre);
+                                userData.put("email", email);
+
+                                db.collection("usuarios").document(user.getUid())
+                                        .set(userData)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                                            finish(); // Vuelve al Login
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(this, "Error al guardar datos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        });
+                            }
                         } else {
                             Toast.makeText(this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     });
         });
 
-        // Clics para volver al Login desde la cabecera o desde el formulario
         tvIrLoginHeader.setOnClickListener(v -> finish());
         tvVolverLoginForm.setOnClickListener(v -> finish());
     }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "935456978156",
+    "project_id": "aeolusfit",
+    "storage_bucket": "aeolusfit.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:935456978156:android:babddf27e86d2314a861c9",
+        "android_client_info": {
+          "package_name": "com.example.aeuolusfit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9sTVj4wA-uUrmyLrCIIWMXpnwX52jhwo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

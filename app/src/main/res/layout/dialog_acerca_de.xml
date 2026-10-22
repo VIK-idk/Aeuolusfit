@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/sello"
+                app:tint="#4F6342"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AeolusFit"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#2C3329"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Versión 1.0\n\nAeolusFit es un proyecto integral de Internet de las Cosas (IoT) diseñado para facilitar la elección diaria de ropa de forma rápida y práctica. El núcleo del sistema consiste en transformar un armario convencional en uno inteligente mediante el uso de sensores, actuadores y microcontroladores, complementado por un módulo exterior que mide las condiciones climáticas en tiempo real. Aunque todo el ecosistema se conecta a una aplicación móvil para gestionar perfiles y recibir recomendaciones personalizadas, el verdadero valor del proyecto reside en su automatización física: el armario reacciona por sí solo al abrirlo, iluminándose y mostrando la vestimenta ideal para el clima del día, permitiendo a los usuarios ahorrar tiempo sin necesidad de interactuar constantemente con su teléfono."
+                android:textColor="#686D65"
+                android:textAlignment="center"
+                android:textSize="14sp"
+                android:layout_marginBottom="24dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCerrarDialog"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Entendido"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:backgroundTint="#4F6342" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

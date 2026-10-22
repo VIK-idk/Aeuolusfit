@@ -2,6 +2,7 @@ package com.example.aeuolusfit;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,13 +47,19 @@ public class MainActivity extends AppCompatActivity {
             irAlLogin();
         });
 
-        // 4. Botón Ver Conjunto Completo
+        // 4. Botón Acerca de -> Muestra el Popup
+        TextView tvAcercaDe = findViewById(R.id.tvAcercaDe);
+        tvAcercaDe.setOnClickListener(v -> {
+            mostrarDialogoAcercaDe();
+        });
+
+        // 5. Botón Ver Conjunto Completo
         MaterialButton btnVerConjunto = findViewById(R.id.btnVerConjunto);
         btnVerConjunto.setOnClickListener(v -> {
             Toast.makeText(this, "Abriendo detalles del conjunto...", Toast.LENGTH_SHORT).show();
         });
 
-        // 5. Clics en la Barra de Navegación Inferior
+        // 6. Clics en la Barra de Navegación Inferior
         LinearLayout navHoy = findViewById(R.id.navHoy);
         LinearLayout navFamilia = findViewById(R.id.navFamilia);
         LinearLayout navArmario = findViewById(R.id.navArmario);
@@ -68,6 +75,22 @@ public class MainActivity extends AppCompatActivity {
         navArmario.setOnClickListener(v -> {
             Toast.makeText(this, "Sección Armario en construcción", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void mostrarDialogoAcercaDe() {
+        android.app.Dialog dialog = new android.app.Dialog(this);
+        dialog.setContentView(R.layout.dialog_acerca_de);
+
+        // Hacemos el fondo transparente para que se vean las esquinas redondeadas de tu tarjeta
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        Button btnCerrar = dialog.findViewById(R.id.btnCerrarDialog);
+        btnCerrar.setOnClickListener(v -> dialog.dismiss()); // Cierra el popup al hacer clic
+
+        dialog.show();
     }
 
     private void irAlLogin() {

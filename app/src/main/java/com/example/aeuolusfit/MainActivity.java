@@ -1,22 +1,44 @@
 package com.example.aeuolusfit;
 
+import android.app.Dialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
+    private final String[] nombresPestanas = new String[]{"Hoy", "Familia", "Armario"};
+    private final int[] iconosPestanas = new int[]{
+            android.R.drawable.ic_menu_day,
+            android.R.drawable.ic_menu_myplaces,
+            android.R.drawable.ic_menu_gallery
+    };
+
+    // Notificaciones (Unidad 6)
+    private NotificationManager notificationManager;
+    static final String CANAL_ID = "canal_aeolusfit";
+    static final int NOTIFICACION_LLUVIA_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,20 +48,22 @@ public class MainActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
 
-        // 1. Proteger la pantalla: Si no hay usuario, devolver al Login
         if (currentUser == null) {
             irAlLogin();
             return;
         }
 
-        // 2. Personalizar el saludo con el nombre del usuario
-        TextView tvSaludo = findViewById(R.id.tvSaludo);
-        String nombre = currentUser.getDisplayName();
-        if (nombre != null && !nombre.isEmpty()) {
-            tvSaludo.setText("¡Buenos días, " + nombre + "!");
-        }
+        // Configurar Pestañas con ViewPager2 y TabLayoutMediator (Unidad 2 - 2.8)
+        ViewPager2 viewPager = findViewById(R.id.viewpager);
+        viewPager.setAdapter(new MiPagerAdapter(this));
 
-        // 3. Botón de Perfil -> Usado temporalmente para Cerrar Sesión
+        TabLayout tabs = findViewById(R.id.tabs);
+        new TabLayoutMediator(tabs, viewPager, (tab, position) -> {
+            tab.setText(nombresPestanas[position]);
+            tab.setIcon(iconosPestanas[position]);
+        }).attach();
+
+        // Configurar botones de cabecera
         MaterialCardView btnPerfil = findViewById(R.id.btnPerfil);
         btnPerfil.setOnClickListener(v -> {
             auth.signOut();
@@ -47,55 +71,70 @@ public class MainActivity extends AppCompatActivity {
             irAlLogin();
         });
 
-        // 4. Botón Acerca de -> Muestra el Popup
         TextView tvAcercaDe = findViewById(R.id.tvAcercaDe);
-        tvAcercaDe.setOnClickListener(v -> {
-            mostrarDialogoAcercaDe();
-        });
+        tvAcercaDe.setOnClickListener(v -> mostrarDialogoAcercaDe());
 
-        // 5. Botón Ver Conjunto Completo
-        MaterialButton btnVerConjunto = findViewById(R.id.btnVerConjunto);
-        btnVerConjunto.setOnClickListener(v -> {
-            Toast.makeText(this, "Abriendo detalles del conjunto...", Toast.LENGTH_SHORT).show();
-        });
+        crearCanalNotificaciones();
+    }
 
-        // 6. Clics en la Barra de Navegación Inferior
-        LinearLayout navHoy = findViewById(R.id.navHoy);
-        LinearLayout navFamilia = findViewById(R.id.navFamilia);
-        LinearLayout navArmario = findViewById(R.id.navArmario);
+    // Adaptador de pestañas según el PDF Ud2
+    public static class MiPagerAdapter extends FragmentStateAdapter {
+        public MiPagerAdapter(FragmentActivity activity) {
+            super(activity);
+        }
 
-        navHoy.setOnClickListener(v -> {
-            // Ya estamos en Hoy
-        });
+        @Override
+        public int getItemCount() {
+            return 3;
+        }
 
-        navFamilia.setOnClickListener(v -> {
-            Toast.makeText(this, "Sección Familia en construcción", Toast.LENGTH_SHORT).show();
-        });
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            switch (position) {
+                case 0: return new HoyFragment();
+                case 1: return new FamiliaFragment();
+                case 2: return new ArmarioFragment();
+                default: return new HoyFragment();
+            }
+        }
+    }
 
-        navArmario.setOnClickListener(v -> {
-            Toast.makeText(this, "Sección Armario en construcción", Toast.LENGTH_SHORT).show();
-        });
+    // Método público para lanzar alerta climática en barra de estado (Unidad 6)
+    public void lanzarNotificacionClimatica(String titulo, String texto) {
+        NotificationCompat.Builder notificacion = new NotificationCompat.Builder(this, CANAL_ID)
+                .setContentTitle(titulo)
+                .setContentText(texto)
+                .setSmallIcon(android.R.drawable.ic_popup_reminder)
+                .setAutoCancel(true);
+        notificationManager.notify(NOTIFICACION_LLUVIA_ID, notificacion.build());
+    }
+
+    private void crearCanalNotificaciones() {
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CANAL_ID, "Alertas Climáticas AeolusFit",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Avisos de lluvia y recomendaciones del armario IoT");
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     private void mostrarDialogoAcercaDe() {
-        android.app.Dialog dialog = new android.app.Dialog(this);
+        Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_acerca_de);
-
-        // Hacemos el fondo transparente para que se vean las esquinas redondeadas de tu tarjeta
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            dialog.getWindow().setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
-
         Button btnCerrar = dialog.findViewById(R.id.btnCerrarDialog);
-        btnCerrar.setOnClickListener(v -> dialog.dismiss()); // Cierra el popup al hacer clic
-
+        btnCerrar.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
     private void irAlLogin() {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        // Limpiamos el historial para que no pueda volver a esta pantalla pulsando "Atrás"
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

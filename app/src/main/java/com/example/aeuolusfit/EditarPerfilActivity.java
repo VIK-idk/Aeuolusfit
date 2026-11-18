@@ -28,7 +28,9 @@ public class EditarPerfilActivity extends AppCompatActivity {
 
     private String idFamiliar, nombreActual, colorHexActual, sensacionActual;
     private int edadActual = 0;
+    private double ajusteActual = 0.0;
     private boolean esTitular = false;
+    private boolean esPerfilTermicoOficial = false; // Identifica si es perfil_1 a perfil_4
 
     private TextView tvSubtituloEditarPerfil, tvAvatarInicialEditar;
     private TextView tvHeaderNombreEditar, tvHeaderEdadEditar, tvHeaderSensacionEditar;
@@ -48,7 +50,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        // 1. Recoger datos pasados por el Intent (Unidad 3 - 3.2 Comunicación entre actividades)
+        // 1. Recoger datos pasados por el Intent
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             idFamiliar = extras.getString("id", "titular");
@@ -57,6 +59,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
             sensacionActual = extras.getString("sensacion", "Suele tener frío");
             colorHexActual = extras.getString("colorHex", "#E8CEBF");
             esTitular = extras.getBoolean("esTitular", false);
+            ajusteActual = extras.getDouble("ajuste", 0.0);
         } else {
             idFamiliar = "titular";
             nombreActual = "";
@@ -65,6 +68,9 @@ public class EditarPerfilActivity extends AppCompatActivity {
             colorHexActual = "#E8CEBF";
             esTitular = true;
         }
+
+        // Si el ID empieza por "perfil_", sabemos que estamos editando uno de los 4 perfiles térmicos unificados
+        esPerfilTermicoOficial = (idFamiliar != null && idFamiliar.startsWith("perfil_"));
 
         inicializarVistas();
         configurarEscuchadoresTexto();
@@ -79,8 +85,8 @@ public class EditarPerfilActivity extends AppCompatActivity {
         btnGuardar.setOnClickListener(v -> guardarCambiosFirestore());
 
         btnEliminar = findViewById(R.id.btnAbrirModalEliminar);
-        // Si es el titular, protegemos la cuenta ocultando la opción de borrado
-        if (esTitular) {
+        // Si es el titular o uno de los 4 perfiles térmicos oficiales del sistema, protegemos ocultando el borrado
+        if (esTitular || esPerfilTermicoOficial) {
             btnEliminar.setVisibility(View.GONE);
         } else {
             btnEliminar.setVisibility(View.VISIBLE);
@@ -104,17 +110,23 @@ public class EditarPerfilActivity extends AppCompatActivity {
         tvLabelCalor = findViewById(R.id.tvLabelCalor);
 
         etNombrePerfilEditar.setText(nombreActual);
-        if (edadActual > 0) {
-            etEdadPerfilEditar.setText(String.valueOf(edadActual));
+
+        if (esPerfilTermicoOficial) {
+            // Si es perfil térmico, en el campo edad mostramos temporalmente su valor de ajuste numérico (-5, +5, etc.)
+            etEdadPerfilEditar.setText(String.valueOf(ajusteActual));
+            tvHeaderEdadEditar.setText("Ajuste térmico: " + ajusteActual + "°C");
         } else {
-            etEdadPerfilEditar.setText("");
+            if (edadActual > 0) {
+                etEdadPerfilEditar.setText(String.valueOf(edadActual));
+            } else {
+                etEdadPerfilEditar.setText("");
+            }
         }
 
-        seleccionarSensacion(sensacionActual != null && sensacionActual.contains("frío"));
+        seleccionarSensacion(sensacionActual != null && (sensacionActual.contains("frío") || sensacionActual.contains("Ajuste")));
     }
 
     private void configurarEscuchadoresTexto() {
-        // Actualiza el avatar e inicial en vivo mientras el usuario teclea
         etNombrePerfilEditar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -122,24 +134,26 @@ public class EditarPerfilActivity extends AppCompatActivity {
                 if (!n.isEmpty()) {
                     tvAvatarInicialEditar.setText(String.valueOf(n.charAt(0)).toUpperCase());
                     tvHeaderNombreEditar.setText(n + (esTitular ? " (Titular)" : ""));
-                    tvSubtituloEditarPerfil.setText(esTitular ? "Tus preferencias personales." : "Pequeños detalles para cuidar de " + n + ".");
                 } else {
                     tvAvatarInicialEditar.setText("—");
-                    tvHeaderNombreEditar.setText(esTitular ? "Titular" : "Familiar");
+                    tvHeaderNombreEditar.setText("Perfil");
                 }
             }
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // Actualiza la edad en vivo en la tarjeta de cabecera
         etEdadPerfilEditar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String e = s.toString().trim();
                 if (!e.isEmpty()) {
-                    tvHeaderEdadEditar.setText(e + " años aprox.");
+                    if (esPerfilTermicoOficial) {
+                        tvHeaderEdadEditar.setText("Ajuste térmico: " + e + "°C");
+                    } else {
+                        tvHeaderEdadEditar.setText(e + " años aprox.");
+                    }
                 } else {
-                    tvHeaderEdadEditar.setText("Edad sin definir");
+                    tvHeaderEdadEditar.setText(esPerfilTermicoOficial ? "Ajuste sin definir" : "Edad sin definir");
                 }
             }
             @Override public void afterTextChanged(Editable s) {}
@@ -160,30 +174,25 @@ public class EditarPerfilActivity extends AppCompatActivity {
             tvLabelCalor.setTypeface(null, Typeface.NORMAL);
             tvLabelCalor.setTextColor(Color.parseColor("#686D65"));
 
-            tvHeaderSensacionEditar.setText("❄️  Suele tener frío");
+            tvHeaderSensacionEditar.setText("❄️  Sensibilidad baja / Frío");
         } else {
             cardOpcionCalor.setCardBackgroundColor(Color.parseColor("#EAEFE5"));
             cardOpcionCalor.setStrokeColor(Color.parseColor("#4F6342"));
             tvLabelCalor.setTypeface(null, Typeface.BOLD);
             tvLabelCalor.setTextColor(Color.parseColor("#4F6342"));
 
-            cardFrioOnboarding(Color.WHITE);
             cardOpcionFrio.setCardBackgroundColor(Color.WHITE);
             cardOpcionFrio.setStrokeColor(Color.parseColor("#D4D6CF"));
             tvLabelFrio.setTypeface(null, Typeface.NORMAL);
             tvLabelFrio.setTextColor(Color.parseColor("#686D65"));
 
-            tvHeaderSensacionEditar.setText("☀️  Suele tener calor");
+            tvHeaderSensacionEditar.setText("☀️  Sensibilidad alta / Calor");
         }
     }
 
-    private void cardFrioOnboarding(int white) {
-        cardOpcionFrio.setCardBackgroundColor(white);
-    }
-
     private void actualizarCabecera() {
-        String nombreMostrado = (nombreActual != null && !nombreActual.isEmpty()) ? nombreActual : (esTitular ? "Titular" : "Familiar");
-        tvSubtituloEditarPerfil.setText(esTitular ? "Tus preferencias personales." : "Pequeños detalles para cuidar de " + nombreMostrado + ".");
+        String nombreMostrado = (nombreActual != null && !nombreActual.isEmpty()) ? nombreActual : "Perfil";
+        tvSubtituloEditarPerfil.setText(esPerfilTermicoOficial ? "Ajusta el nombre y el valor térmico del perfil IoT." : "Preferencias del perfil.");
 
         if (!nombreMostrado.isEmpty()) {
             tvAvatarInicialEditar.setText(String.valueOf(nombreMostrado.charAt(0)).toUpperCase());
@@ -191,13 +200,17 @@ public class EditarPerfilActivity extends AppCompatActivity {
             tvAvatarInicialEditar.setText("—");
         }
 
-        tvHeaderNombreEditar.setText(nombreMostrado + (esTitular ? " (Titular)" : ""));
-        tvHeaderEdadEditar.setText(edadActual > 0 ? (edadActual + " años aprox.") : "Edad sin definir");
+        tvHeaderNombreEditar.setText(nombreMostrado);
+        if (esPerfilTermicoOficial) {
+            tvHeaderEdadEditar.setText("Ajuste térmico: " + ajusteActual + "°C");
+        } else {
+            tvHeaderEdadEditar.setText(edadActual > 0 ? (edadActual + " años aprox.") : "Edad sin definir");
+        }
     }
 
     private void guardarCambiosFirestore() {
         String nuevoNombre = etNombrePerfilEditar.getText().toString().trim();
-        String edadStr = etEdadPerfilEditar.getText().toString().trim();
+        String valorStr = etEdadPerfilEditar.getText().toString().trim();
 
         if (nuevoNombre.isEmpty()) {
             etNombrePerfilEditar.setError("El nombre es obligatorio");
@@ -205,28 +218,44 @@ public class EditarPerfilActivity extends AppCompatActivity {
             return;
         }
 
-        if (edadStr.isEmpty()) {
-            etEdadPerfilEditar.setError("Indica la edad");
+        if (valorStr.isEmpty()) {
+            etEdadPerfilEditar.setError("Indica un valor");
             etEdadPerfilEditar.requestFocus();
             return;
         }
 
-        int nuevaEdad;
-        try {
-            nuevaEdad = Integer.parseInt(edadStr);
-            if (nuevaEdad <= 0 || nuevaEdad > 120) {
-                etEdadPerfilEditar.setError("Introduce una edad válida");
-                etEdadPerfilEditar.requestFocus();
-                return;
-            }
-        } catch (NumberFormatException e) {
-            etEdadPerfilEditar.setError("Formato incorrecto");
-            return;
-        }
-
         if (user != null) {
-            if (esTitular) {
-                // Actualiza los datos raíz del titular de la cuenta
+            if (esPerfilTermicoOficial) {
+                // 🔴 GUARDAR CAMBIOS PARA LOS 4 PERFILES TÉRMICOS OFICIALES (perfil_1 a perfil_4)
+                double nuevoAjuste;
+                try {
+                    nuevoAjuste = Double.parseDouble(valorStr);
+                } catch (NumberFormatException e) {
+                    etEdadPerfilEditar.setError("Introduce un número válido (ej. -5 o 5)");
+                    return;
+                }
+
+                Map<String, Object> datosPerfilMap = new HashMap<>();
+                datosPerfilMap.put("nombre", nuevoNombre);
+                datosPerfilMap.put("ajuste", nuevoAjuste);
+
+                Map<String, Object> actualizacionFinal = new HashMap<>();
+                actualizacionFinal.put(idFamiliar, datosPerfilMap);
+
+                db.collection("usuarios").document(user.getUid())
+                        .collection("configuracion").document("perfiles")
+                        .set(actualizacionFinal, SetOptions.merge())
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(this, "Perfil térmico actualizado con éxito", Toast.LENGTH_SHORT).show();
+                            finish();
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(this, "Error al guardar: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+            } else if (esTitular) {
+                // Actualiza datos del titular
+                int nuevaEdad;
+                try { nuevaEdad = Integer.parseInt(valorStr); } catch (Exception ex) { nuevaEdad = 25; }
+
                 Map<String, Object> datosTitular = new HashMap<>();
                 datosTitular.put("nombre", nuevoNombre);
                 datosTitular.put("edad", nuevaEdad);
@@ -238,9 +267,12 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             Toast.makeText(this, "Perfil titular actualizado", Toast.LENGTH_SHORT).show();
                             finish();
                         })
-                        .addOnFailureListener(e -> Toast.makeText(this, "Error al guardar perfil", Toast.LENGTH_SHORT).show());
+                        .addOnFailureListener(e -> Toast.makeText(this, "Error al guardar", Toast.LENGTH_SHORT).show());
             } else {
-                // Actualiza el familiar secundario en la subcolección
+                // Perfil familiar secundario normal
+                int nuevaEdad;
+                try { nuevaEdad = Integer.parseInt(valorStr); } catch (Exception ex) { nuevaEdad = 25; }
+
                 Familiar actualizado = new Familiar(idFamiliar, nuevoNombre, "Familiar", colorHexActual, false, nuevaEdad, sensacionActual);
                 db.collection("usuarios").document(user.getUid())
                         .collection("familiares").document(idFamiliar)
@@ -249,7 +281,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             Toast.makeText(this, "Perfil actualizado", Toast.LENGTH_SHORT).show();
                             finish();
                         })
-                        .addOnFailureListener(e -> Toast.makeText(this, "Error al guardar cambios", Toast.LENGTH_SHORT).show());
+                        .addOnFailureListener(e -> Toast.makeText(this, "Error al guardar", Toast.LENGTH_SHORT).show());
             }
         }
     }
@@ -269,18 +301,18 @@ public class EditarPerfilActivity extends AppCompatActivity {
         TextView tvSensacion = dialog.findViewById(R.id.tvResumenSensacionModal);
 
         String nombreMostrado = etNombrePerfilEditar.getText().toString().trim();
-        String edadMostrada = etEdadPerfilEditar.getText().toString().trim();
+        String valorMostrado = etEdadPerfilEditar.getText().toString().trim();
 
-        tvTitulo.setText("¿Eliminar el perfil de " + nombreMostrado + "?");
+        tvTitulo.setText("¿Eliminar perfil " + nombreMostrado + "?");
         tvInicial.setText(!nombreMostrado.isEmpty() ? String.valueOf(nombreMostrado.charAt(0)).toUpperCase() : "—");
-        tvNombreEdad.setText(nombreMostrado + (!edadMostrada.isEmpty() ? " · " + edadMostrada + " años aprox." : ""));
+        tvNombreEdad.setText(nombreMostrado);
         tvSensacion.setText(sensacionActual);
 
         dialog.findViewById(R.id.btnCerrarModalX).setOnClickListener(v -> dialog.dismiss());
         dialog.findViewById(R.id.btnCancelarEliminarModal).setOnClickListener(v -> dialog.dismiss());
 
         dialog.findViewById(R.id.btnConfirmarEliminarDefinitivo).setOnClickListener(v -> {
-            if (user != null && !esTitular) {
+            if (user != null && !esTitular && !esPerfilTermicoOficial) {
                 db.collection("usuarios").document(user.getUid())
                         .collection("familiares").document(idFamiliar)
                         .delete()
@@ -289,7 +321,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             dialog.dismiss();
                             finish();
                         })
-                        .addOnFailureListener(e -> Toast.makeText(this, "Error al eliminar perfil", Toast.LENGTH_SHORT).show());
+                        .addOnFailureListener(e -> Toast.makeText(this, "Error al eliminar", Toast.LENGTH_SHORT).show());
             }
         });
 

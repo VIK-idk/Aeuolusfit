@@ -36,111 +36,182 @@ public class RecomendadorHibridoIA {
     }
 
     // =========================================================================
-    // 1. OBTENER RECOMENDACIÓN DE CONJUNTO DIARIO (Soluciona los errores en HoyFragment)
+    // 1. OBTENER RECOMENDACIÓN DE CONJUNTO DIARIO CON AJUSTE TÉRMICO
     // =========================================================================
     public static void obtenerRecomendacion(Familiar familiar, Aplicacion app, List<Prenda> prendas, OnResultadoRecomendacion callback) {
-        if (familiar.getUltimoTituloConjunto() != null && !familiar.getUltimoTituloConjunto().isEmpty()) {
-            callback.onRecomendacionLista(familiar.getUltimoTituloConjunto(), familiar.getUltimaDescripcionConjunto(), true);
-        }
 
-        new Thread(() -> {
-            boolean exitoIA = false;
-            String tituloFinal = "";
-            String descFinal = "";
+        // Primero consultamos el ajuste térmico personalizado del perfil en Firestore
+        obtenerAjusteTermicoPerfil(familiar, ajusteTermico -> {
 
-            if (!API_KEY.startsWith("TU_")) {
-                try {
-                    String prompt = "Eres el asistente inteligente de AeolusFit. Genera una recomendación de conjunto.\n"
-                            + "Usuario: " + familiar.getNombre() + " (" + familiar.getEdad() + " años, suele tener " + familiar.getSensacionTermica() + ").\n"
-                            + "Clima actual: " + (app.getTemperaturaActual() != null ? app.getTemperaturaActual() : 18) + "°C, "
-                            + "Humedad: " + (app.getHumedadActual() != null ? app.getHumedadActual() : 60) + "%.\n"
-                            + "Previsión: " + app.getConsejoLluvia() + ".\n"
-                            + "Prendas disponibles en armario: " + (prendas != null ? prendas.size() : 0) + ".\n\n"
-                            + "Responde ÚNICAMENTE un JSON con este formato:\n"
-                            + "{\"titulo\": \"Conjunto breve (máx 6 palabras)\", \"descripcion\": \"Consejo de vestimenta de 2 frases teniendo en cuenta su preferencia térmica y la lluvia.\"}";
+            if (familiar.getUltimoTituloConjunto() != null && !familiar.getUltimoTituloConjunto().isEmpty()) {
+                callback.onRecomendacionLista(familiar.getUltimoTituloConjunto(), familiar.getUltimaDescripcionConjunto(), true);
+            }
 
-                    JSONObject textPart = new JSONObject().put("text", prompt);
-                    JSONArray parts = new JSONArray().put(textPart);
-                    JSONObject content = new JSONObject().put("parts", parts);
-                    JSONArray contents = new JSONArray().put(content);
-                    JSONObject payload = new JSONObject().put("contents", contents);
+            new Thread(() -> {
+                boolean exitoIA = false;
+                String tituloFinal = "";
+                String descFinal = "";
 
-                    URL url = new URL(ENDPOINT);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("Content-Type", "application/json");
-                    conn.setDoOutput(true);
-                    conn.setConnectTimeout(5000);
-                    conn.setReadTimeout(5000);
+                // Temperatura real del entorno modificada por la sensibilidad del perfil
+                double tempReal = app.getTemperaturaActual() != null ? app.getTemperaturaActual() : 18.0;
+                double temperaturaAjustada = tempReal + ajusteTermico;
 
-                    OutputStream os = conn.getOutputStream();
-                    os.write(payload.toString().getBytes("UTF-8"));
-                    os.close();
+                if (!API_KEY.startsWith("TU_")) {
+                    try {
+                        String prompt = "Eres el asistente inteligente de AeolusFit. Genera una recomendación de conjunto totalmente adaptada.\n"
+                                + "Usuario: " + familiar.getNombre() + ".\n"
+                                + "Temperatura real exterior: " + tempReal + "°C, Humedad: " + (app.getHumedadActual() != null ? app.getHumedadActual() : 60) + "%.\n"
+                                + "Sensibilidad térmica (Ajuste aplicado): " + ajusteTermico + "°C (Temperatura percibida por el usuario: " + temperaturaAjustada + "°C).\n"
+                                + "Previsión: " + app.getConsejoLluvia() + ".\n"
+                                + "Prendas disponibles en armario: " + (prendas != null ? prendas.size() : 0) + ".\n\n"
+                                + "Instrucción crucial: Basándote en su temperatura percibida (" + temperaturaAjustada + "°C), recomfréndale un conjunto específico (si siente mucho frío por un ajuste bajo, abrígalo con capas pesadas; si siente mucho calor, usa ropa muy ligera).\n"
+                                + "Responde ÚNICAMENTE un JSON con este formato:\n"
+                                + "{\"titulo\": \"Conjunto breve (máx 6 palabras)\", \"descripcion\": \"Consejo de vestimenta de 2 frases teniendo en cuenta su sensibilidad térmica y la lluvia.\"}";
 
-                    if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                        StringBuilder sb = new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) sb.append(line);
-                        br.close();
+                        JSONObject textPart = new JSONObject().put("text", prompt);
+                        JSONArray parts = new JSONArray().put(textPart);
+                        JSONObject content = new JSONObject().put("parts", parts);
+                        JSONArray contents = new JSONArray().put(content);
+                        JSONObject payload = new JSONObject().put("contents", contents);
 
-                        JSONObject respJson = new JSONObject(sb.toString());
-                        String rawText = respJson.getJSONArray("candidates")
-                                .getJSONObject(0).getJSONObject("content")
-                                .getJSONArray("parts").getJSONObject(0).getString("text");
+                        URL url = new URL(ENDPOINT);
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setRequestMethod("POST");
+                        conn.setRequestProperty("Content-Type", "application/json");
+                        conn.setDoOutput(true);
+                        conn.setConnectTimeout(5000);
+                        conn.setReadTimeout(5000);
 
-                        rawText = rawText.replace("```json", "").replace("```", "").trim();
-                        JSONObject parsed = new JSONObject(rawText);
+                        OutputStream os = conn.getOutputStream();
+                        os.write(payload.toString().getBytes("UTF-8"));
+                        os.close();
 
-                        tituloFinal = parsed.getString("titulo");
-                        descFinal = parsed.getString("descripcion");
-                        exitoIA = true;
+                        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                            StringBuilder sb = new StringBuilder();
+                            String line;
+                            while ((line = br.readLine()) != null) sb.append(line);
+                            br.close();
+
+                            JSONObject respJson = new JSONObject(sb.toString());
+                            String rawText = respJson.getJSONArray("candidates")
+                                    .getJSONObject(0).getJSONObject("content")
+                                    .getJSONArray("parts").getJSONObject(0).getString("text");
+
+                            rawText = rawText.replace("```json", "").replace("```", "").trim();
+                            JSONObject parsed = new JSONObject(rawText);
+
+                            tituloFinal = parsed.getString("titulo");
+                            descFinal = parsed.getString("descripcion");
+                            exitoIA = true;
+                        }
+                        conn.disconnect();
+                    } catch (Exception ignored) {
+                        exitoIA = false;
                     }
-                    conn.disconnect();
-                } catch (Exception ignored) {
-                    exitoIA = false;
                 }
-            }
 
-            if (!exitoIA) {
-                String[] local = calcularRecomendacionLocal(familiar, app);
-                tituloFinal = local[0];
-                descFinal = local[1];
-            }
+                if (!exitoIA) {
+                    String[] local = calcularRecomendacionLocalConAjuste(temperaturaAjustada, familiar, app);
+                    tituloFinal = local[0];
+                    descFinal = local[1];
+                }
 
-            guardarMemoriaFamiliar(familiar, tituloFinal, descFinal);
+                guardarMemoriaFamiliar(familiar, tituloFinal, descFinal);
 
-            String fTit = tituloFinal;
-            String fDesc = descFinal;
-            boolean fExito = exitoIA;
-            callback.onRecomendacionLista(fTit, fDesc, fExito);
-        }).start();
+                callback.onRecomendacionLista(tituloFinal, descFinal, exitoIA);
+            }).start();
+        });
     }
 
-    private static String[] calcularRecomendacionLocal(Familiar familiar, Aplicacion app) {
-        double temp = app.getTemperaturaActual() != null ? app.getTemperaturaActual() : 18.0;
-        boolean friolero = familiar.getSensacionTermica().contains("frío");
-        int lluvia = app.getProbLluviaTarde();
+    // Método auxiliar para leer el ajuste térmico de Firestore de cada perfil
+    private static void obtenerAjusteTermicoPerfil(Familiar familiar, OnAjusteLoadedListener listener) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            listener.onAjusteLoaded(0.0);
+            return;
+        }
 
+        FirebaseFirestore.getInstance().collection("usuarios").document(user.getUid())
+                .collection("configuracion").document("perfiles")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Buscamos el perfil según el ID o nombre (ej: "perfil_1", "perfil_2", etc.)
+                        Map<String, Object> perfilData = (Map<String, Object>) documentSnapshot.get(familiar.getId());
+                        if (perfilData != null && perfilData.containsKey("ajuste")) {
+                            double ajuste = ((Number) perfilData.get("ajuste")).doubleValue();
+                            listener.onAjusteLoaded(ajuste);
+                            return;
+                        }
+                    }
+                    listener.onAjusteLoaded(0.0); // Valor por defecto si no lo encuentra
+                })
+                .addOnFailureListener(e -> listener.onAjusteLoaded(0.0));
+    }
+
+    public interface OnAjusteLoadedListener {
+        void onAjusteLoaded(double ajuste);
+    }
+
+    private static String[] calcularRecomendacionLocalConAjuste(double temperaturaAjustada, Familiar familiar, Aplicacion app) {
+        int lluvia = app.getProbLluviaTarde();
         String tit;
         String desc;
 
-        if (temp < 15) {
-            tit = friolero ? "Chaqueta térmica, jersey y pantalón grueso" : "Sudadera de algodón y pantalón largo";
-            desc = "Día fresco. Abrigamos especialmente a " + familiar.getNombre() + " según su preferencia térmica.";
-        } else if (temp < 23) {
-            tit = friolero ? "Camisa de manga larga y chaqueta ligera" : "Camiseta suave y pantalón cómodo";
-            desc = "Temperatura suave. Conjunto equilibrado para la jornada de " + familiar.getNombre() + ".";
+        if (temperaturaAjustada < 5) {
+            tit = "Abrigo pesado, bufanda y capas térmicas";
+            desc = "Clima extremadamente frío percibido para " + familiar.getNombre() + ". Se requiere máxima protección.";
+        } else if (temperaturaAjustada < 15) {
+            tit = "Chaqueta gruesa y jersey de manga larga";
+            desc = "Ambiente fresco para la sensibilidad de " + familiar.getNombre() + ". Capas intermedias recomendadas.";
+        } else if (temperaturaAjustada < 25) {
+            tit = "Camiseta cómoda y pantalón ligero";
+            desc = "Temperatura agradable y equilibrada para el confort de " + familiar.getNombre() + ".";
         } else {
-            tit = "Ropa fresca y transpirable";
-            desc = "Ambiente cálido. Prendas ligeras para evitar el exceso de calor.";
+            tit = "Ropa muy ligera y transpirable";
+            desc = "Calor intenso percibido por " + familiar.getNombre() + ". Prioriza prendas frescas y ligeras.";
         }
 
         if (lluvia >= 40) {
-            desc += " No olvides añadir un chubasquero o paraguas por previsión de lluvia.";
+            desc += " Lleva paraguas o chubasquero por previsión de lluvia.";
         }
 
         return new String[]{tit, desc};
+    }
+
+    // =========================================================================
+    // 2. APRENDIZAJE ADAPTATIVO POR FEEDBACK (IA ADAPTA EL AJUSTE)
+    // =========================================================================
+    public static void registrarFeedbackYAdaptarAjuste(Familiar familiar, boolean pasoFrio) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+
+        FirebaseFirestore.getInstance().collection("usuarios").document(user.getUid())
+                .collection("configuracion").document("perfiles")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Map<String, Object> perfilData = (Map<String, Object>) documentSnapshot.get(familiar.getId());
+                        if (perfilData != null && perfilData.containsKey("ajuste")) {
+                            double ajusteActual = ((Number) perfilData.get("ajuste")).doubleValue();
+
+                            // Si pasó frío, restamos 1.0 grado (haciéndolo más friolero/sensible). Si pasó calor, sumamos 1.0
+                            if (pasoFrio) {
+                                ajusteActual -= 1.0;
+                            } else {
+                                ajusteActual += 1.0;
+                            }
+
+                            perfilData.put("ajuste", ajusteActual);
+
+                            // Guardamos el nuevo ajuste aprendido en Firestore
+                            FirebaseFirestore.getInstance().collection("usuarios").document(user.getUid())
+                                    .collection("configuracion").document("perfiles")
+                                    .update(familiar.getId(), perfilData);
+                        }
+                    }
+                });
     }
 
     private static void guardarMemoriaFamiliar(Familiar f, String titulo, String desc) {
@@ -175,9 +246,18 @@ public class RecomendadorHibridoIA {
     }
 
     // =========================================================================
-    // 2. CONVERSACIÓN EN EL CHATBOT FLOTANTE
+    // 3. CONVERSACIÓN EN EL CHATBOT FLOTANTE
     // =========================================================================
     public static void conversarConIA(Familiar familiar, String mensajeUsuario, Aplicacion app, List<MensajeChat> ultimosMensajes, OnChatRespuestaListener listener) {
+
+        // Detectar automáticamente si el usuario da feedback de temperatura en el chat
+        String mensajeLower = mensajeUsuario.toLowerCase();
+        if (mensajeLower.contains("frío") || mensajeLower.contains("frio")) {
+            registrarFeedbackYAdaptarAjuste(familiar, true);
+        } else if (mensajeLower.contains("calor")) {
+            registrarFeedbackYAdaptarAjuste(familiar, false);
+        }
+
         new Thread(() -> {
             String respuestaTexto = "";
 
@@ -186,14 +266,10 @@ public class RecomendadorHibridoIA {
                     JSONObject contextoSistema = new JSONObject();
                     contextoSistema.put("usuario_nombre", familiar.getNombre());
                     contextoSistema.put("usuario_edad", familiar.getEdad());
-                    contextoSistema.put("usuario_sensacion_habitual", familiar.getSensacionTermica());
                     contextoSistema.put("ciudad", app.getCiudadActual());
                     contextoSistema.put("temperatura_actual", app.getTemperaturaActual() != null ? app.getTemperaturaActual() : 18);
                     contextoSistema.put("humedad_actual", app.getHumedadActual() != null ? app.getHumedadActual() : 60);
-                    contextoSistema.put("temperatura_max_hoy", app.getMaxTemp());
-                    contextoSistema.put("temperatura_min_hoy", app.getMinTemp());
                     contextoSistema.put("probabilidad_lluvia_tarde", app.getProbLluviaTarde());
-                    contextoSistema.put("consejo_clima_hoy", app.getConsejoLluvia());
                     contextoSistema.put("conjunto_asignado", familiar.getUltimoTituloConjunto());
 
                     JSONArray historialArr = new JSONArray();
@@ -206,16 +282,15 @@ public class RecomendadorHibridoIA {
                         }
                     }
 
-                    String prompt = "Eres el asistente inteligente de AeolusFit, un sistema de armario inteligente para el hogar.\n"
-                            + "Dispones del siguiente contexto técnico y meteorológico en tiempo real:\n"
+                    String prompt = "Eres el asistente inteligente de AeolusFit, un sistema de armario inteligente.\n"
+                            + "Contexto meteorológico y del usuario:\n"
                             + contextoSistema.toString() + "\n\n"
-                            + "Historial reciente de la conversación:\n"
+                            + "Historial reciente:\n"
                             + historialArr.toString() + "\n\n"
                             + "Nuevo mensaje del usuario: \"" + mensajeUsuario + "\"\n\n"
                             + "Instrucciones:\n"
-                            + "- Responde a cualquier consulta sobre el clima, la ropa, la sensación térmica o sugerencias usando los datos proporcionados.\n"
-                            + "- Si te da feedback sobre el conjunto (pasó frío, calor, etc.), muestra empatía y explica cómo lo adaptarás.\n"
-                            + "- Mantén un tono natural, cercano y conciso (máximo 2-3 oraciones). Sin viñetas ni Markdown pesado.";
+                            + "- Responde de forma natural, cercana y concisa (máximo 2-3 oraciones).\n"
+                            + "- Si te comenta que ha pasado frío o calor, demuéstrale empatía y confírmale que has adaptado su sensibilidad térmica en el sistema.";
 
                     JSONObject textPart = new JSONObject().put("text", prompt);
                     JSONArray parts = new JSONArray().put(textPart);
@@ -252,13 +327,11 @@ public class RecomendadorHibridoIA {
             }
 
             if (respuestaTexto.isEmpty()) {
-                respuestaTexto = "He tomado nota de tu comentario para adaptar las sugerencias de tu armario en tu perfil.";
+                respuestaTexto = "He tomado nota de tu comentario para adaptar las sugerencias de tu armario.";
             }
 
             guardarMensajeEnFirestore(familiar.getId(), respuestaTexto, false);
-
-            String finalRespuesta = respuestaTexto;
-            listener.onRespuesta(finalRespuesta);
+            listener.onRespuesta(respuestaTexto);
         }).start();
     }
 

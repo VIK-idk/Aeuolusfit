@@ -25,13 +25,16 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeListener {
 
@@ -54,6 +57,7 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
     private Aplicacion appGlobal;
 
     private Familiar familiarSeleccionado = null;
+    private boolean actualizandoDesdeRemoto = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,13 +85,12 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
 
         configurarSaludoYHora();
         configurarRecyclerViewPerfiles();
-        cargarSoloPerfilActivoYFamiliares();
+        cargarPerfilesTermicosOficiales();
         escucharPrendasReales();
         escucharModuloIoTFibestore();
 
         onClimaActualizado();
 
-        // Botón Compartir (Unidad 3)
         ImageView btnCompartir = v.findViewById(R.id.btnCompartirConjunto);
         btnCompartir.setOnClickListener(view -> {
             Intent i = new Intent(Intent.ACTION_SEND);
@@ -96,7 +99,6 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
             startActivity(Intent.createChooser(i, "Compartir conjunto"));
         });
 
-        // Alerta de lluvia / Notificación (Unidad 6)
         MaterialCardView cardAlerta = v.findViewById(R.id.cardAlertaLluvia);
         cardAlerta.setOnClickListener(view -> {
             if (getActivity() instanceof MainActivity) {
@@ -107,14 +109,12 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
             }
         });
 
-        // Navegar a Armario
         MaterialButton btnVerConjunto = v.findViewById(R.id.btnVerConjunto);
         btnVerConjunto.setOnClickListener(view -> {
             ViewPager2 vp = requireActivity().findViewById(R.id.viewpager);
             vp.setCurrentItem(2, true);
         });
 
-        // Botón flotante para interactuar con la IA sobre sensaciones y meteorología
         fabFeedbackIA.setOnClickListener(view -> mostrarDialogoFeedback());
 
         return v;
@@ -146,7 +146,6 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
         adaptadorChat = new AdaptadorChat(mensajesConversacion);
         rvChat.setAdapter(adaptadorChat);
 
-        // Cargar historial persistido en Firestore
         if (currentUser != null) {
             db.collection("usuarios").document(currentUser.getUid())
                     .collection("familiares").document(familiarSeleccionado.getId())
@@ -167,7 +166,6 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
                             adaptadorChat.notifyDataSetChanged();
                             rvChat.scrollToPosition(mensajesConversacion.size() - 1);
                         } else {
-                            // Mensaje inicial contextual si no existen registros previos
                             String hora = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
                             mensajesConversacion.add(new MensajeChat(
                                     "¡Hola " + familiarSeleccionado.getNombre() + "! Hoy tenemos " + tvTemperaturaHoy.getText() + ". ¿Tienes alguna duda sobre el tiempo o cómo te sentiste con la ropa?",
@@ -194,10 +192,8 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
             tvPensando.setVisibility(View.VISIBLE);
             btnEnviar.setEnabled(false);
 
-            // 1. Guardar mensaje del usuario en Firestore
             RecomendadorHibridoIA.guardarMensajeEnFirestore(familiarSeleccionado.getId(), texto, true);
 
-            // 2. Invocar al motor con el contexto del chat
             RecomendadorHibridoIA.conversarConIA(familiarSeleccionado, texto, appGlobal, mensajesConversacion, respuestaIA -> {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
@@ -265,12 +261,9 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
     private void escucharModuloIoTFibestore() {
         if (currentUser == null) return;
 
-        // Escucha en tiempo real de la colección global alimentada por la Raspberry Pi
         db.collection("dispositivos_iot").document("M001")
                 .addSnapshotListener((doc, e) -> {
-                    if (e != null) {
-                        return;
-                    }
+                    if (e != null) return;
 
                     if (doc != null && doc.exists()) {
                         Double temp = doc.getDouble("temperatura");
@@ -279,14 +272,12 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
                         Boolean puertaAbierta = doc.getBoolean("puertaAbierta");
                         Boolean presencia = doc.getBoolean("presencia");
 
-                        // 1. Actualizar datos en la aplicación (AppGlobal)
                         if (Boolean.TRUE.equals(conectado) && temp != null && hum != null) {
                             if (appGlobal != null) {
                                 appGlobal.actualizarDesdeHardware(temp, hum);
                             }
                         }
 
-                        // 2. Actualizar tu texto de estado en la interfaz
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
                                 if (tvEstadoSensores != null) {
@@ -319,80 +310,94 @@ public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeLis
         adaptadorPerfiles = new AdaptadorPerfilesChip(listaPerfiles);
 
         adaptadorPerfiles.setOnPerfilClickListener((familiar, posicion) -> {
-            familiarSeleccionado = familiar;
-            tvParaUsuario.setText("• Para " + familiar.getNombre());
-            fabFeedbackIA.setText("¿Cómo se sintió " + familiar.getNombre() + "?");
-            solicitarRecomendacion(familiar);
+            seleccionarPerfilActivo(familiar, true);
         });
 
         rvPerfilesHoy.setAdapter(adaptadorPerfiles);
     }
 
-    private void cargarSoloPerfilActivoYFamiliares() {
+    private void seleccionarPerfilActivo(Familiar familiar, boolean origenApp) {
+        familiarSeleccionado = familiar;
+        tvParaUsuario.setText("• Para " + familiar.getNombre());
+        fabFeedbackIA.setText("¿Cómo se sintió " + familiar.getNombre() + "?");
+
+        for (Familiar f : listaPerfiles) {
+            f.setSeleccionado(f.getId().equals(familiar.getId()));
+        }
+        adaptadorPerfiles.notifyDataSetChanged();
+
+        if (origenApp && currentUser != null && !actualizandoDesdeRemoto) {
+            Map<String, Object> update = new HashMap<>();
+            update.put("perfilActivo", familiar.getId());
+
+            db.collection("usuarios").document(currentUser.getUid())
+                    .collection("configuracion").document("estado_actual")
+                    .set(update, SetOptions.merge());
+        }
+
+        solicitarRecomendacion(familiar);
+    }
+
+    private void cargarPerfilesTermicosOficiales() {
         if (currentUser == null) return;
         String uid = currentUser.getUid();
 
-        db.collection("usuarios").document(uid).addSnapshotListener((doc, error) -> {
-            String nombreTitular = "Tú";
-            int edadTitular = 0;
-            String sensacionTitular = "Suele tener frío";
-            String tipoUsoTitular = "personal";
-            List<String> memoriaTitular = new ArrayList<>();
-            String ultTitular = null;
-            String ultDescTitular = null;
+        db.collection("usuarios").document(uid)
+                .collection("configuracion").document("perfiles")
+                .addSnapshotListener((docPerfiles, error) -> {
+                    if (docPerfiles == null || !docPerfiles.exists()) return;
 
-            if (doc != null && doc.exists()) {
-                if (doc.getString("nombre") != null && !doc.getString("nombre").trim().isEmpty()) {
-                    nombreTitular = doc.getString("nombre").split(" ")[0];
-                } else if (currentUser.getDisplayName() != null && !currentUser.getDisplayName().trim().isEmpty()) {
-                    nombreTitular = currentUser.getDisplayName().split(" ")[0];
-                }
+                    List<Familiar> perfilesNuevos = new ArrayList<>();
 
-                Long edadDoc = doc.getLong("edad");
-                if (edadDoc != null) edadTitular = edadDoc.intValue();
+                    for (int i = 1; i <= 4; i++) {
+                        String key = "perfil_" + i;
+                        if (docPerfiles.contains(key)) {
+                            Map<String, Object> data = (Map<String, Object>) docPerfiles.get(key);
+                            if (data != null) {
+                                String nombre = (String) data.get("nombre");
+                                double ajuste = data.containsKey("ajuste") ? ((Number) data.get("ajuste")).doubleValue() : 0.0;
 
-                String sensDoc = doc.getString("sensacionTermica");
-                if (sensDoc != null && !sensDoc.isEmpty()) sensacionTitular = sensDoc;
-
-                String usoDoc = doc.getString("tipoUsoArmario");
-                if (usoDoc != null && !usoDoc.isEmpty()) tipoUsoTitular = usoDoc;
-
-                List<String> histDoc = (List<String>) doc.get("historialMemoriaIA");
-                if (histDoc != null) memoriaTitular = histDoc;
-
-                ultTitular = doc.getString("ultimoTituloConjunto");
-                ultDescTitular = doc.getString("ultimaDescripcionConjunto");
-            }
-
-            final Familiar titular = new Familiar("titular", nombreTitular, "Titular", "#E8CEBF", true, edadTitular, sensacionTitular);
-            titular.setTipoUso(tipoUsoTitular);
-            titular.setHistorialMemoriaIA(memoriaTitular);
-            titular.setUltimoTituloConjunto(ultTitular);
-            titular.setUltimaDescripcionConjunto(ultDescTitular);
-
-            db.collection("usuarios").document(uid).collection("familiares")
-                    .addSnapshotListener((snapshots, e) -> {
-                        listaPerfiles.clear();
-                        listaPerfiles.add(titular);
-
-                        if (snapshots != null) {
-                            for (QueryDocumentSnapshot d : snapshots) {
-                                Familiar f = d.toObject(Familiar.class);
-                                f.setId(d.getId());
-                                f.setSeleccionado(false);
-                                listaPerfiles.add(f);
+                                Familiar f = new Familiar();
+                                f.setId(key);
+                                f.setNombre(nombre != null ? nombre : "Perfil " + i);
+                                f.setSensacionTermica("Ajuste térmico: " + ajuste + "°C");
+                                f.setColorHex("#4F6342");
+                                f.setSeleccionado(i == 1);
+                                perfilesNuevos.add(f);
                             }
                         }
+                    }
+
+                    if (!perfilesNuevos.isEmpty()) {
+                        listaPerfiles.clear();
+                        listaPerfiles.addAll(perfilesNuevos);
                         adaptadorPerfiles.notifyDataSetChanged();
 
                         if (familiarSeleccionado == null) {
-                            familiarSeleccionado = titular;
-                            tvParaUsuario.setText("• Para " + titular.getNombre());
-                            fabFeedbackIA.setText("¿Cómo se sintió " + titular.getNombre() + "?");
-                            solicitarRecomendacion(titular);
+                            seleccionarPerfilActivo(listaPerfiles.get(0), false);
                         }
-                    });
-        });
+                    }
+                });
+
+        db.collection("usuarios").document(uid)
+                .collection("configuracion").document("estado_actual")
+                .addSnapshotListener((docEstado, err) -> {
+                    if (docEstado != null && docEstado.exists()) {
+                        String idActivo = docEstado.getString("perfilActivo");
+                        if (idActivo != null) {
+                            for (Familiar f : listaPerfiles) {
+                                if (f.getId().equals(idActivo)) {
+                                    if (familiarSeleccionado == null || !familiarSeleccionado.getId().equals(idActivo)) {
+                                        actualizandoDesdeRemoto = true;
+                                        seleccionarPerfilActivo(f, false);
+                                        actualizandoDesdeRemoto = false;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
     }
 
     private void solicitarRecomendacion(Familiar familiar) {

@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F5EF"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Botón Volver -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnVolver"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E8E8E2"
+            app:cardElevation="0dp"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#3E2723" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Títulos -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TU ESPACIO PERSONAL"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#5E635B"
+            android:layout_marginTop="16dp"
+            android:letterSpacing="0.05"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mi perfil"
+            android:fontFamily="serif"
+            android:textSize="34sp"
+            android:textColor="#3E2723"
+            android:layout_marginTop="2dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tu cuenta, a tu manera."
+            android:textSize="14sp"
+            android:textColor="#686D65"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Tarjeta de Usuario Principal -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="#E8EFE5"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    app:cardCornerRadius="26dp"
+                    app:cardBackgroundColor="#4F6342"
+                    app:cardElevation="0dp">
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="center"
+                        android:src="@android:drawable/ic_menu_myplaces"
+                        app:tint="#FFFFFF" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:id="@+id/tvNombrePerfil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Usuario"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="#3E2723"/>
+                    <TextView
+                        android:id="@+id/tvEmailPerfil"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="correo@email.com"
+                        android:textSize="13sp"
+                        android:textColor="#686D65"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- SECCIÓN: MI CUENTA -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MI CUENTA"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#5E635B"
+            android:layout_marginBottom="8dp"
+            android:letterSpacing="0.05"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E8E8E2"
+            app:cardElevation="0dp"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <!-- Fila 1 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="14dp" android:paddingBottom="14dp" android:gravity="center_vertical">
+                    <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_edit" app:tint="#4F6342"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Datos personales" android:textSize="15sp" android:textStyle="bold" android:textColor="#3E2723"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nombre, correo y teléfono" android:textSize="12sp" android:textColor="#686D65"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="20sp" android:textColor="#686D65"/>
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EFEFE8"/>
+
+                <!-- Fila 2 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="14dp" android:paddingBottom="14dp" android:gravity="center_vertical">
+                    <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_lock_lock" app:tint="#4F6342"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Contraseña y seguridad" android:textSize="15sp" android:textStyle="bold" android:textColor="#3E2723"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cuida el acceso a tu cuenta" android:textSize="12sp" android:textColor="#686D65"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="20sp" android:textColor="#686D65"/>
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EFEFE8"/>
+
+                <!-- Fila 3 -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="14dp" android:paddingBottom="14dp" android:gravity="center_vertical">
+                    <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@android:drawable/ic_menu_manage" app:tint="#4F6342"/>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Preferencias" android:textSize="15sp" android:textStyle="bold" android:textColor="#3E2723"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Notificaciones y personalización" android:textSize="12sp" android:textColor="#686D65"/>
+                    </LinearLayout>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="20sp" android:textColor="#686D65"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- SECCIÓN: SOBRE EL PROYECTO -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SOBRE EL PROYECTO"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#5E635B"
+            android:layout_marginBottom="8dp"
+            android:letterSpacing="0.05"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnAcercaDe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E8E8E2"
+            app:cardElevation="0dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@android:drawable/ic_menu_info_details"
+                    app:tint="#4F6342"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Acerca de AeolusFit"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="#3E2723"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Conoce lo que hay detrás"
+                        android:textSize="13sp"
+                        android:textColor="#686D65"/>
+                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="20sp"
+                    android:textColor="#686D65"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón Cerrar Sesión -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCerrarSesion"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:backgroundTint="#F2E3DE"
+            android:textColor="#8D4C42"
+            android:text="Cerrar sesión"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:strokeWidth="0dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AeolusFit · Hecho para tu día a día"
+            android:textSize="12sp"
+            android:textColor="#8C9188"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+</ScrollView>

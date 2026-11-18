@@ -58,7 +58,7 @@
                 android:textColor="#4F6342"/>
         </RelativeLayout>
 
-        <!-- TARJETA 1: ARMARIO INTELIGENTE -->
+        <!-- TARJETA 1: ARMARIO INTELIGENTE (Estado de la Puerta) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardDispositivoArmario"
             android:layout_width="match_parent"
@@ -67,9 +67,7 @@
             app:cardCornerRadius="24dp"
             app:strokeWidth="1dp"
             app:strokeColor="#E0E0E0"
-            app:cardElevation="0dp"
-            android:clickable="true"
-            android:focusable="true">
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -106,23 +104,14 @@
                         android:textColor="#2C3329"/>
 
                     <TextView
-                        android:id="@+id/tvEstadoArmario"
+                        android:id="@+id/tvEstadoPuerta"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="✓  Conectado"
+                        android:text="Estado: Cargando..."
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:textColor="#4F6342"/>
-
-                    <TextView
-                        android:id="@+id/tvAccionArmario"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Ver detalles  ›"
-                        android:textSize="13sp"
-                        android:textColor="#7D524A"/>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -137,9 +126,7 @@
             app:cardCornerRadius="24dp"
             app:strokeWidth="1dp"
             app:strokeColor="#E0E0E0"
-            app:cardElevation="0dp"
-            android:clickable="true"
-            android:focusable="true">
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -180,25 +167,6 @@
                             android:textStyle="bold"
                             android:textSize="18sp"
                             android:textColor="#2C3329"/>
-
-                        <TextView
-                            android:id="@+id/tvEstadoModulo"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="✓  Conectado"
-                            android:textSize="13sp"
-                            android:textStyle="bold"
-                            android:textColor="#4F6342"/>
-
-                        <TextView
-                            android:id="@+id/tvAccionModulo"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="Ver detalles  ›"
-                            android:textSize="13sp"
-                            android:textColor="#7D524A"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -232,7 +200,7 @@
                                     android:id="@+id/tvTempModuloArmario"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="18 °C"
+                                    android:text="-- °C"
                                     android:textSize="28sp"
                                     android:textColor="#2C3329"/>
                                 <TextView
@@ -252,7 +220,7 @@
                                     android:id="@+id/tvHumModuloArmario"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="65 %"
+                                    android:text="-- %"
                                     android:textSize="28sp"
                                     android:textColor="#2C3329"/>
                                 <TextView
@@ -263,217 +231,8 @@
                                     android:textColor="#686D65"/>
                             </LinearLayout>
                         </LinearLayout>
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp">
-                            <TextView
-                                android:id="@+id/tvUltimaLecturaModulo"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Última lectura · 8:28"
-                                android:textSize="11sp"
-                                android:textColor="#686D65"/>
-                            <TextView
-                                android:id="@+id/tvEtiquetaDatosModulo"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:text="Datos en tiempo real"
-                                android:textStyle="bold"
-                                android:textSize="11sp"
-                                android:textColor="#4F6342"/>
-                        </RelativeLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- TARJETA 3: ILUMINACIÓN DEL ARMARIO -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="24dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0"
-            app:cardElevation="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="💡 Iluminación del armario"
-                    android:fontFamily="serif"
-                    android:textSize="22sp"
-                    android:textColor="#2C3329"/>
-
-                <!-- Aviso de bloqueo cuando está desconectado -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cardAvisoBloqueoLuz"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:visibility="gone"
-                    app:cardBackgroundColor="#F0EFE8"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="12dp"
-                        android:text="🔒  Reconecta el armario para consultar y cambiar sus ajustes."
-                        android:textSize="12sp"
-                        android:textColor="#686D65"/>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Switch Luz LED -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp">
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Luz LED"
-                            android:textStyle="bold"
-                            android:textSize="15sp"
-                            android:textColor="#2C3329"/>
-                        <TextView
-                            android:id="@+id/tvEstadoLuzLed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Encendida"
-                            android:textSize="12sp"
-                            android:textColor="#686D65"/>
-                    </LinearLayout>
-
-                    <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/switchLuzLed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:checked="true"/>
-                </RelativeLayout>
-
-                <!-- Brillo SeekBar -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Brillo"
-                        android:textSize="14sp"
-                        android:textColor="#686D65"/>
-                    <TextView
-                        android:id="@+id/tvPorcentajeBrillo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="75 %"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:textColor="#4F6342"/>
-                </RelativeLayout>
-
-                <SeekBar
-                    android:id="@+id/seekBarBrillo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:max="100"
-                    android:progress="75"
-                    android:progressTint="#4F6342"
-                    android:thumbTint="#4F6342"/>
-
-                <!-- Duración de la luz -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:text="Duración de la luz"
-                        android:textSize="14sp"
-                        android:textColor="#686D65"/>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_alignParentEnd="true"
-                        app:cardBackgroundColor="#F4E9E6"
-                        app:cardCornerRadius="10dp"
-                        app:cardElevation="0dp">
-                        <Spinner
-                            android:id="@+id/spinnerDuracionLuz"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:paddingStart="8dp"
-                            android:paddingEnd="8dp"/>
-                    </com.google.android.material.card.MaterialCardView>
-                </RelativeLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#EFEFE8"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"/>
-
-                <!-- Tiempo de pantalla -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:text="Tiempo de pantalla"
-                        android:textSize="14sp"
-                        android:textColor="#686D65"/>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:layout_alignParentEnd="true"
-                        app:cardBackgroundColor="#F4E9E6"
-                        app:cardCornerRadius="10dp"
-                        app:cardElevation="0dp">
-                        <Spinner
-                            android:id="@+id/spinnerTiempoPantalla"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:paddingStart="8dp"
-                            android:paddingEnd="8dp"/>
-                    </com.google.android.material.card.MaterialCardView>
-                </RelativeLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnGuardarAjustesLuz"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="20dp"
-                    android:text="Guardar ajustes"
-                    android:textAllCaps="false"
-                    android:textSize="16sp"
-                    app:cornerRadius="14dp"
-                    app:backgroundTint="#4F6342"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

@@ -3,58 +3,107 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
+    android:orientation="vertical"
+    android:background="#F7F5EF"
     android:padding="24dp"
-    android:orientation="vertical">
+    android:gravity="center_horizontal">
 
+    <!-- Botón superior para cerrar el diálogo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/btnCerrarDialog"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="#3E2723"
+            android:contentDescription="Cerrar" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TU ARMARIO, CONECTADO CONTIGO"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:textColor="#4F6342"
+        android:layout_marginTop="8dp"
+        android:letterSpacing="0.05"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AeolusFit"
+        android:fontFamily="serif"
+        android:textSize="32sp"
+        android:textColor="#3E2723"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Imagen ilustrativa del armario -->
+    <ImageView
+        android:layout_width="180dp"
+        android:layout_height="140dp"
+        android:src="@drawable/armario"
+        android:scaleType="fitCenter"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Un armario inteligente que te ayuda a elegir qué ponerte cada día"
+        android:textSize="16sp"
+        android:fontFamily="serif"
+        android:textColor="#3E2723"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+    <!-- Tarjeta Propósito -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#FFFFFF"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp">
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="#E8EFE5"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
+        android:layout_marginBottom="24dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:padding="24dp">
-
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/sello"
-                app:tint="#4F6342"
-                android:layout_marginBottom="16dp"/>
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="AeolusFit"
-                android:textSize="20sp"
+                android:text="🌱  Nuestro propósito"
+                android:textSize="15sp"
                 android:textStyle="bold"
-                android:textColor="#2C3329"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#3E2723"
+                android:layout_marginBottom="6dp"/>
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Versión 1.0\n\nAeolusFit es un proyecto integral de Internet de las Cosas (IoT) diseñado para facilitar la elección diaria de ropa de forma rápida y práctica. El núcleo del sistema consiste en transformar un armario convencional en uno inteligente mediante el uso de sensores, actuadores y microcontroladores, complementado por un módulo exterior que mide las condiciones climáticas en tiempo real. Aunque todo el ecosistema se conecta a una aplicación móvil para gestionar perfiles y recibir recomendaciones personalizadas, el verdadero valor del proyecto reside en su automatización física: el armario reacciona por sí solo al abrirlo, iluminándose y mostrando la vestimenta ideal para el clima del día, permitiendo a los usuarios ahorrar tiempo sin necesidad de interactuar constantemente con su teléfono."
-                android:textColor="#686D65"
-                android:textAlignment="center"
-                android:textSize="14sp"
-                android:layout_marginBottom="24dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCerrarDialog"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="Entendido"
-                android:textAllCaps="false"
-                app:cornerRadius="12dp"
-                app:backgroundTint="#4F6342" />
-
+                android:layout_height="wrap_content"
+                android:text="Hacer más fácil vestirte cada mañana. Conectar tu estilo con la tecnología para aprovechar what ya tienes y elegir con más confianza."
+                android:textSize="13sp"
+                android:textColor="#5E635B"
+                android:lineSpacingExtra="3dp"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tecnología que encaja contigo."
+        android:textSize="12sp"
+        android:textColor="#8C9188"
+        android:layout_marginBottom="8dp"/>
+
 </LinearLayout>

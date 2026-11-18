@@ -40,6 +40,6 @@
         <activity android:name=".MainActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ConectarDispositivoActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".EditarPerfilActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
-
+        <activity android:name=".MiPerfilActivity" android:exported="false" />
     </application>
 </manifest>

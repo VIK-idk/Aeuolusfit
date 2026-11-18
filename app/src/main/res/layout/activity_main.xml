@@ -20,67 +20,52 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Logo y texto AeolusFit (Izquierda) -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true">
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 android:src="@drawable/sello"
                 app:tint="#4F6342" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:text="AeolusFit"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:textColor="#4F6342"/>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <!-- Botón Perfil Circular (Derecha) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btnPerfilTop"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_alignParentEnd="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_centerVertical="true"
+            app:cardCornerRadius="24dp"
+            app:cardBackgroundColor="#F2E6DF"
+            app:cardElevation="0dp"
+            android:clickable="true"
+            android:focusable="true">
 
-            <TextView
-                android:id="@+id/tvAcercaDe"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Acerca de"
-                android:textColor="#4F6342"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:padding="8dp"
-                android:layout_marginEnd="8dp"
-                android:clickable="true"
-                android:focusable="true"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/btnPerfil"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                app:cardCornerRadius="20dp"
-                app:cardBackgroundColor="#F2E6DF"
-                app:cardElevation="0dp"
-                android:clickable="true"
-                android:focusable="true">
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:src="@android:drawable/ic_menu_myplaces"
-                    app:tint="#4F6342"/>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_menu_myplaces"
+                app:tint="#4F6342" />
+        </com.google.android.material.card.MaterialCardView>
     </RelativeLayout>
 
-    <!-- VIEWPAGER2 PARA NAVEGAR ENTRE FRAGMENTS (Ud2 - 2.8) -->
+    <!-- VIEWPAGER2 PARA NAVEGAR ENTRE FRAGMENTS -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewpager"
         android:layout_width="0dp"
@@ -90,7 +75,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- TABLAYOUT EN LA PARTE INFERIOR CON ESTILO AEOLUSFIT -->
+    <!-- TABLAYOUT EN LA PARTE INFERIOR -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="0dp"
@@ -102,7 +87,7 @@
         app:tabIndicatorHeight="3dp"
         app:tabSelectedTextColor="#4F6342"
         app:tabTextColor="#686D65"
-        app:tabIconTint="@color/black"
+        app:tabIconTint="#686D65"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

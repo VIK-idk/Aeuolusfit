@@ -1,15 +1,11 @@
 package com.example.aeuolusfit;
 
-import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -42,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             android.R.drawable.ic_menu_gallery
     };
 
-    // Notificaciones (Unidad 6)
+    // Notificaciones
     private NotificationManager notificationManager;
     static final String CANAL_ID = "canal_aeolusfit";
     static final int NOTIFICACION_LLUVIA_ID = 1;
@@ -56,20 +52,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
-        DatosInicialesFirestore.cargarDatosCompletos(this);
 
         if (currentUser == null) {
             irAlLogin();
             return;
         }
 
-        // Configurar Pestañas con ViewPager2 y TabLayoutMediator (Unidad 2 - 2.8)
+        // Carga y inicialización de los 4 perfiles limpios en Firestore al arrancar
+        DatosInicialesFirestore.cargarDatosCompletos(this);
+
+        // Configurar Pestañas con ViewPager2
         ViewPager2 viewPager = findViewById(R.id.viewpager);
         viewPager.setAdapter(new MiPagerAdapter(this));
 
@@ -79,22 +76,18 @@ public class MainActivity extends AppCompatActivity {
             tab.setIcon(iconosPestanas[position]);
         }).attach();
 
-        // Configurar botones de cabecera
-        MaterialCardView btnPerfil = findViewById(R.id.btnPerfil);
-        btnPerfil.setOnClickListener(v -> {
-            auth.signOut();
-            Toast.makeText(this, "Sesión cerrada", Toast.LENGTH_SHORT).show();
-            irAlLogin();
-        });
-
-        TextView tvAcercaDe = findViewById(R.id.tvAcercaDe);
-        tvAcercaDe.setOnClickListener(v -> mostrarDialogoAcercaDe());
+        // Configurar botón de Perfil de la cabecera usando MaterialCardView
+        MaterialCardView btnPerfilTop = findViewById(R.id.btnPerfilTop);
+        if (btnPerfilTop != null) {
+            btnPerfilTop.setOnClickListener(v -> {
+                startActivity(new Intent(MainActivity.this, MiPerfilActivity.class));
+            });
+        }
 
         crearCanalNotificaciones();
         solicitarPermisosNecesarios();
-
-
     }
+
     private void solicitarPermisosNecesarios() {
         List<String> permisos = new ArrayList<>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -114,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Adaptador de pestañas según el PDF Ud2
+    // Adaptador de pestañas
     public static class MiPagerAdapter extends FragmentStateAdapter {
         public MiPagerAdapter(FragmentActivity activity) {
             super(activity);
@@ -137,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Método público para lanzar alerta climática en barra de estado (Unidad 6)
+    // Método para lanzar alertas
     public void lanzarNotificacionClimatica(String titulo, String texto) {
         NotificationCompat.Builder notificacion = new NotificationCompat.Builder(this, CANAL_ID)
                 .setContentTitle(titulo)
@@ -156,18 +149,6 @@ public class MainActivity extends AppCompatActivity {
             channel.setDescription("Avisos de lluvia y recomendaciones del armario IoT");
             notificationManager.createNotificationChannel(channel);
         }
-    }
-
-    private void mostrarDialogoAcercaDe() {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.dialog_acerca_de);
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-        Button btnCerrar = dialog.findViewById(R.id.btnCerrarDialog);
-        btnCerrar.setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
     }
 
     private void irAlLogin() {

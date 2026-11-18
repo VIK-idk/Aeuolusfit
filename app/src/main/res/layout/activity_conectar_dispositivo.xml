@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAF9F4"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Cabecera: <- Armario y Logo AeolusFit -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvVolverArmarioTop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="←  Armario"
+                android:textSize="15sp"
+                android:textColor="#686D65"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/sello"
+                    app:tint="#4F6342"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="AeolusFit"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="#4F6342"/>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Barra de progreso de 3 pasos -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <!-- Paso 1 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:orientation="vertical">
+                <View
+                    android:id="@+id/barraPaso1"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#E0DED7"/>
+                <TextView
+                    android:id="@+id/tvLabelPaso1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="1. Preparar\ndispositivo"
+                    android:textSize="11sp"
+                    android:textColor="#686D65"/>
+            </LinearLayout>
+
+            <!-- Paso 2 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="3dp"
+                android:layout_marginEnd="3dp"
+                android:orientation="vertical">
+                <View
+                    android:id="@+id/barraPaso2"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#E0DED7"/>
+                <TextView
+                    android:id="@+id/tvLabelPaso2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="2. Conectar"
+                    android:textSize="11sp"
+                    android:textColor="#686D65"/>
+            </LinearLayout>
+
+            <!-- Paso 3 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:orientation="vertical">
+                <View
+                    android:id="@+id/barraPaso3"
+                    android:layout_width="match_parent"
+                    android:layout_height="4dp"
+                    android:background="#E0DED7"/>
+                <TextView
+                    android:id="@+id/tvLabelPaso3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="3. Comprobar\nconexión"
+                    android:textSize="11sp"
+                    android:textColor="#686D65"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Título y Subtítulo del paso -->
+        <TextView
+            android:id="@+id/tvTituloWizard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Conecta tu hogar"
+            android:fontFamily="serif"
+            android:textSize="32sp"
+            android:textColor="#2C3329"/>
+
+        <TextView
+            android:id="@+id/tvSubtituloWizard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Un pequeño paso para cuidar de tu día. Te acompañamos de principio a fin."
+            android:textSize="15sp"
+            android:textColor="#686D65"/>
+
+        <!-- Ilustración Central con Badge de Estado -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="#EAEFE5"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/armario"
+                    android:scaleType="fitCenter"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardBadgeEstadoWizard"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:visibility="gone"
+                    app:cardCornerRadius="24dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardElevation="2dp">
+                    <TextView
+                        android:id="@+id/tvIconoBadgeWizard"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="✓"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#4F6342"/>
+                </com.google.android.material.card.MaterialCardView>
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- SECCIÓN PASO 0: Selector "¿Qué quieres conectar?" -->
+        <LinearLayout
+            android:id="@+id/layoutSelectorDispositivo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿Qué quieres conectar?"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:textColor="#2C3329"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Opción 1: Armario inteligente -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElegirArmario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#EAEFE5"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="1.5dp"
+                app:strokeColor="#4F6342"
+                app:cardElevation="0dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="👕  Armario inteligente"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="#2C3329"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Iluminación y ajustes del armario"
+                            android:textSize="13sp"
+                            android:textColor="#686D65"/>
+                    </LinearLayout>
+                    <RadioButton
+                        android:id="@+id/rbArmario"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:checked="true"
+                        android:clickable="false"/>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Opción 2: Módulo exterior -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardElegirModulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#D4D6CF"
+                app:cardElevation="0dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🌡️  Módulo exterior"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="#2C3329"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="El tiempo, desde tu hogar"
+                            android:textSize="13sp"
+                            android:textColor="#686D65"/>
+                    </LinearLayout>
+                    <RadioButton
+                        android:id="@+id/rbModulo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:checked="false"
+                        android:clickable="false"/>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- SECCIÓN PASOS 1 A 5: Detalles e Instrucciones -->
+        <LinearLayout
+            android:id="@+id/layoutPasosDetalle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Tarjeta Resumen Dispositivo Elegido -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardResumenDispositivoWizard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="16dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#E0E0E0"
+                app:cardElevation="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:id="@+id/tvNombreDispositivoElegido"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="👕  Armario inteligente"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#2C3329"/>
+                    <TextView
+                        android:id="@+id/tvSubestadoDispositivoElegido"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Dispositivo elegido"
+                        android:textSize="13sp"
+                        android:textColor="#686D65"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Instrucción 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="top">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardBackgroundColor="#EAEFE5"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:id="@+id/tvIconoInst1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="⏻"
+                        android:textColor="#4F6342"
+                        android:textStyle="bold"/>
+                </com.google.android.material.card.MaterialCardView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tvTituloInst1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Comprueba que está encendido"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="#2C3329"/>
+                    <TextView
+                        android:id="@+id/tvDescInst1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Antes de continuar, asegúrate de que tu armario esté encendido."
+                        android:textSize="13sp"
+                        android:textColor="#686D65"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Instrucción 2 (Opcional según el paso) -->
+            <LinearLayout
+                android:id="@+id/layoutInstruccion2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:gravity="top">
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    app:cardCornerRadius="10dp"
+                    app:cardBackgroundColor="#EAEFE5"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="📱"
+                        android:textColor="#4F6342"/>
+                </com.google.android.material.card.MaterialCardView>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quédate cerca"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="#2C3329"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Acerca el móvil al armario y sigue los pasos de la app."
+                        android:textSize="13sp"
+                        android:textColor="#686D65"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Píldora Informativa Inferior -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardBannerInfoWizard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#EAEFE5"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp">
+                <TextView
+                    android:id="@+id/tvBannerInfoWizard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:text="🌿  No necesitas hacerlo deprisa. Te guiaremos en cada paso."
+                    android:textSize="13sp"
+                    android:textColor="#4F6342"/>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Botón Principal: Continuar / Reintentar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnContinuarWizard"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="28dp"
+            android:text="Continuar"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:cornerRadius="14dp"
+            app:backgroundTint="#4F6342"/>
+
+        <!-- Enlace Secundario: Volver / Volver a Armario -->
+        <TextView
+            android:id="@+id/tvVolverInferiorWizard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:padding="8dp"
+            android:gravity="center"
+            android:text="Volver a Armario"
+            android:textSize="14sp"
+            android:textColor="#686D65"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
+</ScrollView>

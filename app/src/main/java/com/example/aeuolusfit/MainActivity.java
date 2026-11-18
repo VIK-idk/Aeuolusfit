@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -11,9 +12,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -24,6 +28,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,14 +46,23 @@ public class MainActivity extends AppCompatActivity {
     private NotificationManager notificationManager;
     static final String CANAL_ID = "canal_aeolusfit";
     static final int NOTIFICACION_LLUVIA_ID = 1;
+    private final ActivityResultLauncher<String[]> requestPermissionsLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), permissions -> {
+                Boolean notif = permissions.getOrDefault(android.Manifest.permission.POST_NOTIFICATIONS, false);
+                if (Boolean.FALSE.equals(notif)) {
+                    Toast.makeText(this, "Sin notificaciones no recibirás avisos de lluvia", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         auth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = auth.getCurrentUser();
+        DatosInicialesFirestore.cargarDatosCompletos(this);
 
         if (currentUser == null) {
             irAlLogin();
@@ -75,6 +91,27 @@ public class MainActivity extends AppCompatActivity {
         tvAcercaDe.setOnClickListener(v -> mostrarDialogoAcercaDe());
 
         crearCanalNotificaciones();
+        solicitarPermisosNecesarios();
+
+
+    }
+    private void solicitarPermisosNecesarios() {
+        List<String> permisos = new ArrayList<>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                permisos.add(android.Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT)
+                    != PackageManager.PERMISSION_GRANTED) {
+                permisos.add(android.Manifest.permission.BLUETOOTH_CONNECT);
+            }
+        }
+        if (!permisos.isEmpty()) {
+            requestPermissionsLauncher.launch(permisos.toArray(new String[0]));
+        }
     }
 
     // Adaptador de pestañas según el PDF Ud2

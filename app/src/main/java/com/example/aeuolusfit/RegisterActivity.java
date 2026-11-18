@@ -1,5 +1,6 @@
 package com.example.aeuolusfit;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
-    private FirebaseFirestore db; // Añadimos Firestore
+    private FirebaseFirestore db;
 
     private EditText etNombre, etEmail, etPassword, etConfirmPassword;
     private Button btnRegister;
@@ -31,7 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.register);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance(); // Inicializamos Firestore
+        db = FirebaseFirestore.getInstance();
 
         etNombre = findViewById(R.id.etNombreRegister);
         etEmail = findViewById(R.id.etEmailRegister);
@@ -62,34 +63,44 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
+            btnRegister.setEnabled(false);
+
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
                             FirebaseUser user = auth.getCurrentUser();
                             if (user != null) {
-                                // 1. Guardar nombre en el perfil de Auth
+                                // 1. Actualizar nombre en perfil de Firebase Auth
                                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                         .setDisplayName(nombre)
                                         .build();
                                 user.updateProfile(profileUpdates);
 
-                                // 2. Guardar datos en FIRESTORE
+                                // 2. Guardar registro inicial en Firestore con onboarding pendiente
                                 Map<String, Object> userData = new HashMap<>();
                                 userData.put("nombre", nombre);
                                 userData.put("email", email);
+                                userData.put("onboardingCompletado", false);
 
                                 db.collection("usuarios").document(user.getUid())
                                         .set(userData)
                                         .addOnSuccessListener(aVoid -> {
-                                            Toast.makeText(this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                                            finish(); // Vuelve al Login
+                                            Toast.makeText(this, "Cuenta creada correctamente", Toast.LENGTH_SHORT).show();
+                                            // Pasa directo al Onboarding sin volver al Login
+                                            Intent intent = new Intent(RegisterActivity.this, OnboardingActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
                                         })
                                         .addOnFailureListener(e -> {
-                                            Toast.makeText(this, "Error al guardar datos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                            btnRegister.setEnabled(true);
+                                            Toast.makeText(this, "Error al guardar perfil: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                         });
                             }
                         } else {
-                            Toast.makeText(this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            btnRegister.setEnabled(true);
+                            String error = task.getException() != null ? task.getException().getMessage() : "Fallo en el registro";
+                            Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
                         }
                     });
         });

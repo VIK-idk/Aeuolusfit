@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardBackgroundColor="#FAF9F4"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Cabecera del Chat -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="#EFEFE8">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:cardCornerRadius="20dp"
+                        app:cardBackgroundColor="#4F6342"
+                        app:cardElevation="0dp">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/sello"
+                            app:tint="#FFFFFF"/>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvTituloChatIA"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Asistente AeolusFit"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="#2C3329"/>
+
+                        <TextView
+                            android:id="@+id/tvSubtituloChatIA"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="En línea · Aprendiendo tu comodidad"
+                            android:textSize="12sp"
+                            android:textColor="#4F6342"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/btnCerrarChat"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center"
+                    android:text="✕"
+                    android:textSize="18sp"
+                    android:textColor="#686D65"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </RelativeLayout>
+
+            <!-- Lista de Mensajes del Chat -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMensajesChat"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:clipToPadding="false"/>
+
+            <!-- Indicador de pensando -->
+            <TextView
+                android:id="@+id/tvEstadoEscribiendo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="4dp"
+                android:text="AeolusFit está pensando..."
+                android:textSize="11sp"
+                android:textColor="#686D65"
+                android:visibility="gone"/>
+
+            <!-- Barra inferior para escribir -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="#FAF9F4">
+
+                <EditText
+                    android:id="@+id/etMensajeChat"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@android:drawable/editbox_background_normal"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:hint="Escribe cómo te sentiste..."
+                    android:textSize="14sp"
+                    android:inputType="textCapSentences"
+                    android:textColor="#2C3329"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnEnviarMensajeChat"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    app:cardCornerRadius="24dp"
+                    app:cardBackgroundColor="#4F6342"
+                    app:cardElevation="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="➤"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"/>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

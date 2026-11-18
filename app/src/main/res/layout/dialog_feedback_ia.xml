@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:padding="20dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#FAF9F4"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardBackgroundColor="#EAEFE5"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/sello"
+                        app:tint="#4F6342"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/btnCerrarFeedbackX"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentEnd="true"
+                    android:gravity="center"
+                    android:text="✕"
+                    android:textSize="18sp"
+                    android:textColor="#686D65"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/tvTituloFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="¿Cómo ha ido el conjunto?"
+                android:fontFamily="serif"
+                android:textSize="24sp"
+                android:textColor="#2C3329"/>
+
+            <TextView
+                android:id="@+id/tvPreguntaFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Cuéntame si pasaste frío, calor o si acertamos con la ropa para recordarlo en los próximos días."
+                android:textSize="14sp"
+                android:textColor="#686D65"/>
+
+            <!-- Opciones rápidas con chips -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/chipPaseFrio"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#D4D6CF"
+                    app:cardElevation="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="❄️ Pasé frío"
+                        android:textSize="12sp"
+                        android:textColor="#4F6342"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/chipEstuvoBien"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="#EAEFE5"
+                    app:strokeWidth="1.5dp"
+                    app:strokeColor="#4F6342"
+                    app:cardElevation="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="👌 Perfecto"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="#4F6342"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/chipPaseCalor"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#D4D6CF"
+                    app:cardElevation="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="☀️ Pasé calor"
+                        android:textSize="12sp"
+                        android:textColor="#4F6342"/>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/etComentarioFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="90dp"
+                android:layout_marginTop="16dp"
+                android:background="@android:drawable/editbox_background_normal"
+                android:gravity="top|start"
+                android:padding="12dp"
+                android:hint="Ej. Por la tarde refrescó más de lo esperado y me sobró la chaqueta..."
+                android:inputType="textMultiLine"
+                android:textSize="13sp"
+                android:textColor="#2C3329"/>
+
+            <!-- Respuesta de la IA tras enviar -->
+            <TextView
+                android:id="@+id/tvRespuestaIAFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                android:padding="10dp"
+                android:background="#EAEFE5"
+                android:textSize="13sp"
+                android:textColor="#4F6342"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEnviarFeedback"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="Guardar en memoria"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                app:cornerRadius="14dp"
+                app:backgroundTint="#4F6342"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

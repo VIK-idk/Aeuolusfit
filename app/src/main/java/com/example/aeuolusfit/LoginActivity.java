@@ -30,7 +30,7 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
-    private FirebaseFirestore db; // Añadimos Firestore
+    private FirebaseFirestore db;
     private GoogleSignInClient googleSignInClient;
 
     private EditText etEmail, etPassword;
@@ -45,12 +45,14 @@ public class LoginActivity extends AppCompatActivity {
                     Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                     try {
                         GoogleSignInAccount account = task.getResult(ApiException.class);
-                        firebaseAuthWithGoogle(account.getIdToken());
+                        if (account != null) {
+                            firebaseAuthWithGoogle(account.getIdToken());
+                        }
                     } catch (ApiException e) {
                         Toast.makeText(this, "Error de Google: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    Toast.makeText(this, "Ventana de Google cerrada o fallida", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Inicio con Google cancelado", Toast.LENGTH_SHORT).show();
                 }
             }
     );
@@ -61,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.login);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance(); // Inicializamos Firestore
+        db = FirebaseFirestore.getInstance();
 
         etEmail = findViewById(R.id.etEmailLogin);
         etPassword = findViewById(R.id.etPasswordLogin);
@@ -86,12 +88,16 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
+            btnLogin.setEnabled(false);
+
             auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
+                        btnLogin.setEnabled(true);
                         if (task.isSuccessful()) {
-                            irPantallaPrincipal();
+                            redirigirSegunOnboarding();
                         } else {
-                            Toast.makeText(this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            String errorMsg = task.getException() != null ? task.getException().getMessage() : "Error desconocido";
+                            Toast.makeText(this, "Error: " + errorMsg, Toast.LENGTH_SHORT).show();
                         }
                     });
         });
@@ -113,19 +119,18 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            // Revisar si el usuario de Google ya existe en Firestore
                             DocumentReference docRef = db.collection("usuarios").document(user.getUid());
                             docRef.get().addOnCompleteListener(t -> {
-                                if (t.isSuccessful() && !t.getResult().exists()) {
-                                    // Es su primera vez, guardamos sus datos
+                                if (t.isSuccessful() && (!t.getResult().exists() || t.getResult().getData() == null)) {
+                                    // Usuario nuevo vía Google
                                     Map<String, Object> userData = new HashMap<>();
                                     userData.put("nombre", user.getDisplayName());
                                     userData.put("email", user.getEmail());
+                                    userData.put("onboardingCompletado", false);
 
-                                    docRef.set(userData).addOnCompleteListener(t2 -> irPantallaPrincipal());
+                                    docRef.set(userData).addOnCompleteListener(t2 -> redirigirSegunOnboarding());
                                 } else {
-                                    // Ya existía en la base de datos
-                                    irPantallaPrincipal();
+                                    redirigirSegunOnboarding();
                                 }
                             });
                         }
@@ -135,17 +140,35 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void irPantallaPrincipal() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
+    private void redirigirSegunOnboarding() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return;
+
+        db.collection("usuarios").document(user.getUid()).get()
+                .addOnSuccessListener(doc -> {
+                    Intent intent;
+                    if (doc.exists() && Boolean.TRUE.equals(doc.getBoolean("onboardingCompletado"))) {
+                        intent = new Intent(LoginActivity.this, MainActivity.class);
+                    } else {
+                        intent = new Intent(LoginActivity.this, OnboardingActivity.class);
+                    }
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         if (auth.getCurrentUser() != null) {
-            irPantallaPrincipal();
+            redirigirSegunOnboarding();
         }
     }
 }

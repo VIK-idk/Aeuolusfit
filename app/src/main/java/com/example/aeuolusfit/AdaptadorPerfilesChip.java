@@ -16,15 +16,19 @@ import java.util.List;
 
 public class AdaptadorPerfilesChip extends RecyclerView.Adapter<AdaptadorPerfilesChip.ViewHolder> {
 
+    public interface OnPerfilClickListener {
+        void onPerfilClick(Familiar familiar, int posicion);
+    }
+
     private final List<Familiar> listaPerfiles;
-    protected View.OnClickListener onClickListener;
+    private OnPerfilClickListener listener;
 
     public AdaptadorPerfilesChip(List<Familiar> listaPerfiles) {
         this.listaPerfiles = listaPerfiles;
     }
 
-    public void setOnItemClickListener(View.OnClickListener onClickListener) {
-        this.onClickListener = onClickListener;
+    public void setOnPerfilClickListener(OnPerfilClickListener listener) {
+        this.listener = listener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -39,7 +43,7 @@ public class AdaptadorPerfilesChip extends RecyclerView.Adapter<AdaptadorPerfile
             tvNombreChip = itemView.findViewById(R.id.tvNombreChip);
         }
 
-        public void personaliza(Familiar familiar) {
+        public void bind(Familiar familiar, boolean seleccionado) {
             tvInicialChip.setText(familiar.getInicial());
             try {
                 cardAvatar.setCardBackgroundColor(Color.parseColor(familiar.getColorHex()));
@@ -47,10 +51,10 @@ public class AdaptadorPerfilesChip extends RecyclerView.Adapter<AdaptadorPerfile
                 cardAvatar.setCardBackgroundColor(Color.parseColor("#E8CEBF"));
             }
 
-            if (familiar.isSeleccionado()) {
+            if (seleccionado) {
                 cardChip.setCardBackgroundColor(Color.parseColor("#4F6342"));
                 cardChip.setStrokeWidth(0);
-                tvNombreChip.setText(familiar.getNombre() + "  ✓");
+                tvNombreChip.setText(familiar.getNombre() + " ✓");
                 tvNombreChip.setTextColor(Color.WHITE);
                 tvNombreChip.setTypeface(null, Typeface.BOLD);
             } else {
@@ -69,13 +73,28 @@ public class AdaptadorPerfilesChip extends RecyclerView.Adapter<AdaptadorPerfile
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_perfil_chip, parent, false);
-        view.setOnClickListener(onClickListener);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.personaliza(listaPerfiles.get(position));
+        Familiar familiar = listaPerfiles.get(position);
+        holder.bind(familiar, familiar.isSeleccionado());
+
+        holder.itemView.setOnClickListener(v -> {
+            int posActual = holder.getBindingAdapterPosition();
+            if (posActual != RecyclerView.NO_POSITION) {
+                // Deseleccionar todos y activar únicamente el actual
+                for (int i = 0; i < listaPerfiles.size(); i++) {
+                    listaPerfiles.get(i).setSeleccionado(i == posActual);
+                }
+                notifyDataSetChanged();
+
+                if (listener != null) {
+                    listener.onPerfilClick(listaPerfiles.get(posActual), posActual);
+                }
+            }
+        });
     }
 
     @Override

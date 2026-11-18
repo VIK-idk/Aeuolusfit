@@ -1,6 +1,7 @@
 package com.example.aeuolusfit;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +26,7 @@ import java.util.List;
 public class FamiliaFragment extends Fragment {
 
     private RecyclerView rvListaFamilia;
-    private AdaptadorPerfilesChip adaptador;
+    private AdaptadorFamiliaLista adaptador;
     private final List<Familiar> listaFamilia = new ArrayList<>();
     private FirebaseFirestore db;
     private FirebaseUser user;
@@ -39,10 +40,22 @@ public class FamiliaFragment extends Fragment {
 
         rvListaFamilia = v.findViewById(R.id.rvListaFamilia);
         rvListaFamilia.setLayoutManager(new LinearLayoutManager(getContext()));
-        adaptador = new AdaptadorPerfilesChip(listaFamilia);
-        rvListaFamilia.setAdapter(adaptador);
+        adaptador = new AdaptadorFamiliaLista(listaFamilia);
 
-        cargarFamiliares();
+        // Al pulsar sobre cualquier perfil, abre la pantalla de edición pasando sus datos (Ud3 - 3.2)
+        adaptador.setOnFamiliarClickListener(f -> {
+            Intent i = new Intent(getContext(), EditarPerfilActivity.class);
+            i.putExtra("id", f.getId());
+            i.putExtra("nombre", f.getNombre());
+            i.putExtra("edad", f.getEdad());
+            i.putExtra("sensacion", f.getSensacionTermica());
+            i.putExtra("colorHex", f.getColorHex());
+            i.putExtra("esTitular", "titular".equals(f.getId()));
+            startActivity(i);
+        });
+
+        rvListaFamilia.setAdapter(adaptador);
+        cargarPerfilDuenioYFamiliares();
 
         MaterialButton btnAnadir = v.findViewById(R.id.btnAnadirFamiliar);
         btnAnadir.setOnClickListener(view -> mostrarDialogoNuevoFamiliar());
@@ -50,41 +63,88 @@ public class FamiliaFragment extends Fragment {
         return v;
     }
 
-    private void cargarFamiliares() {
+    private void cargarPerfilDuenioYFamiliares() {
         if (user == null) return;
-        db.collection("usuarios").document(user.getUid()).collection("familiares")
-                .addSnapshotListener((snapshots, e) -> {
-                    listaFamilia.clear();
-                    if (snapshots != null) {
-                        for (QueryDocumentSnapshot doc : snapshots) {
-                            listaFamilia.add(doc.toObject(Familiar.class));
+        String uid = user.getUid();
+
+        // 1. Obtener los datos del dueño de la cuenta en Firestore
+        db.collection("usuarios").document(uid).addSnapshotListener((doc, error) -> {
+            String nombreTitular = "Tú";
+            int edadTitular = 0;
+            String sensacionTitular = "Suele tener frío";
+            String tipoUsoTitular = "personal";
+            List<String> memoriaTitular = new ArrayList<>();
+            String ultTitular = null;
+            String ultDescTitular = null;
+
+            if (doc != null && doc.exists()) {
+                if (doc.getString("nombre") != null && !doc.getString("nombre").trim().isEmpty()) {
+                    nombreTitular = doc.getString("nombre").trim();
+                } else if (user.getDisplayName() != null && !user.getDisplayName().trim().isEmpty()) {
+                    nombreTitular = user.getDisplayName().trim();
+                }
+
+                Long edadDoc = doc.getLong("edad");
+                if (edadDoc != null) edadTitular = edadDoc.intValue();
+
+                String sensDoc = doc.getString("sensacionTermica");
+                if (sensDoc != null && !sensDoc.isEmpty()) sensacionTitular = sensDoc;
+
+                String usoDoc = doc.getString("tipoUsoArmario");
+                if (usoDoc != null && !usoDoc.isEmpty()) tipoUsoTitular = usoDoc;
+
+                List<String> histDoc = (List<String>) doc.get("historialMemoriaIA");
+                if (histDoc != null) memoriaTitular = histDoc;
+
+                ultTitular = doc.getString("ultimoTituloConjunto");
+                ultDescTitular = doc.getString("ultimaDescripcionConjunto");
+            }
+
+            final Familiar familiarTitular = new Familiar("titular", nombreTitular, "Titular de la cuenta", "#E8CEBF", true, edadTitular, sensacionTitular);
+            familiarTitular.setTipoUso(tipoUsoTitular);
+            familiarTitular.setHistorialMemoriaIA(memoriaTitular);
+            familiarTitular.setUltimoTituloConjunto(ultTitular);
+            familiarTitular.setUltimaDescripcionConjunto(ultDescTitular);
+
+            // 2. Escuchar la subcolección de familiares y agregarlos debajo del dueño
+            db.collection("usuarios").document(uid).collection("familiares")
+                    .addSnapshotListener((snapshots, e) -> {
+                        listaFamilia.clear();
+                        // El dueño de la cuenta SIEMPRE va primero
+                        listaFamilia.add(familiarTitular);
+
+                        if (snapshots != null) {
+                            for (QueryDocumentSnapshot d : snapshots) {
+                                Familiar f = d.toObject(Familiar.class);
+                                f.setId(d.getId());
+                                listaFamilia.add(f);
+                            }
                         }
-                    }
-                    if (listaFamilia.isEmpty()) {
-                        listaFamilia.add(new Familiar("1", "Pablo (Demo)", "Pareja", "#D9E2D5", false));
-                        listaFamilia.add(new Familiar("2", "Emma (Demo)", "Hija", "#EDE3CE", false));
-                    }
-                    adaptador.notifyDataSetChanged();
-                });
+                        adaptador.notifyDataSetChanged();
+                    });
+        });
     }
 
     private void mostrarDialogoNuevoFamiliar() {
         if (user == null) return;
-        final EditText input = new EditText(getContext());
-        input.setHint("Nombre del familiar (ej. Carlos)");
+
+        final EditText inputNombre = new EditText(getContext());
+        inputNombre.setHint("Nombre del familiar (ej. Pablo)");
 
         new AlertDialog.Builder(getContext())
-                .setTitle("Nuevo miembro")
-                .setMessage("Se sincronizará automáticamente con la pestaña Hoy:")
-                .setView(input)
-                .setPositiveButton("Guardar", (dialog, which) -> {
-                    String nombre = input.getText().toString().trim();
+                .setTitle("Nuevo perfil familiar")
+                .setMessage("Indica el nombre para configurar sus preferencias de vestimenta:")
+                .setView(inputNombre)
+                .setPositiveButton("Siguiente", (dialog, which) -> {
+                    String nombre = inputNombre.getText().toString().trim();
                     if (!nombre.isEmpty()) {
-                        String id = String.valueOf(System.currentTimeMillis());
-                        Familiar nuevo = new Familiar(id, nombre, "Familiar", "#D9E2D5", false);
-                        db.collection("usuarios").document(user.getUid())
-                                .collection("familiares").document(id).set(nuevo);
-                        Toast.makeText(getContext(), "Familiar añadido a Firestore", Toast.LENGTH_SHORT).show();
+                        // Abrir OnboardingActivity con el cuestionario completo para el nuevo miembro
+                        Intent i = new Intent(getContext(), OnboardingActivity.class);
+                        i.putExtra("esNuevoFamiliar", true);
+                        i.putExtra("nombreFamiliar", nombre);
+                        startActivity(i);
+                    } else {
+                        Toast.makeText(getContext(), "Introduce un nombre", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancelar", null)

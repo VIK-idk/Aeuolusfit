@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAF9F4"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Cabecera -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/sello"
+                app:tint="#4F6342"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="AeolusFit"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#4F6342"/>
+        </LinearLayout>
+
+        <!-- Título principal -->
+        <TextView
+            android:id="@+id/tvTituloBienvenida"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="¡Hola! Te damos la bienvenida"
+            android:fontFamily="serif"
+            android:textSize="32sp"
+            android:textColor="#2C3329"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Antes de comenzar, cuéntanos un poco sobre ti para adaptar el armario y las recomendaciones a tu día a día."
+            android:textSize="15sp"
+            android:textColor="#686D65"/>
+
+        <!-- TARJETA DEL FORMULARIO -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- 1. EDAD -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="¿Cuántos años tienes?"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"/>
+
+                <EditText
+                    android:id="@+id/etEdadOnboarding"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@android:drawable/editbox_background_normal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:hint="Introduce tu edad (ej. 24)"
+                    android:inputType="number"
+                    android:textColor="#2C3329"/>
+
+                <!-- 2. SENSACIÓN TÉRMICA -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="¿Cómo sueles sentir la temperatura?"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <!-- Opción Frío -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardFrioOnboarding"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardBackgroundColor="#EAEFE5"
+                        app:cardCornerRadius="16dp"
+                        app:strokeWidth="1.5dp"
+                        app:strokeColor="#4F6342"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="❄️"
+                                android:textSize="18sp"/>
+                            <TextView
+                                android:id="@+id/tvLabelFrioOnb"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Suelo tener frío"
+                                android:textStyle="bold"
+                                android:textSize="13sp"
+                                android:textColor="#4F6342"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Opción Calor -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCalorOnboarding"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="#D4D6CF"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="☀️"
+                                android:textSize="18sp"/>
+                            <TextView
+                                android:id="@+id/tvLabelCalorOnb"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Suelo tener calor"
+                                android:textSize="13sp"
+                                android:textColor="#686D65"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <!-- 3. LOCALIDAD Y UBICACIÓN -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="¿Dónde vives? (Localidad)"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp">
+
+                    <EditText
+                        android:id="@+id/etLocalidadOnboarding"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_toStartOf="@id/btnDetectarUbicacion"
+                        android:layout_marginEnd="8dp"
+                        android:background="@android:drawable/editbox_background_normal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:hint="Ej. Valencia, Gandía, Madrid..."
+                        android:inputType="textCapWords"
+                        android:textColor="#2C3329"/>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/btnDetectarUbicacion"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:layout_alignParentEnd="true"
+                        app:cardCornerRadius="14dp"
+                        app:cardBackgroundColor="#EAEFE5"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@android:drawable/ic_menu_mylocation"
+                            app:tint="#4F6342"/>
+                    </com.google.android.material.card.MaterialCardView>
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/tvEstadoGps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Toca el botón para detectar tu localidad automáticamente con el GPS."
+                    android:textSize="12sp"
+                    android:textColor="#686D65"/>
+
+                <!-- 4. FINALIDAD DEL ARMARIO -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="¿Cómo vas a usar este armario?"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical">
+
+                    <!-- Opción Personal -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardUsoPersonal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardBackgroundColor="#EAEFE5"
+                        app:cardCornerRadius="14dp"
+                        app:strokeWidth="1.5dp"
+                        app:strokeColor="#4F6342"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="👤  Uso personal"
+                                android:textStyle="bold"
+                                android:textSize="14sp"
+                                android:textColor="#2C3329"/>
+                            <RadioButton
+                                android:id="@+id/rbUsoPersonal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="true"
+                                android:clickable="false"/>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Opción Gestión Familiar -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardUsoFamiliar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="14dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="#D4D6CF"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="👥  Gestión familiar (varios miembros)"
+                                android:textStyle="bold"
+                                android:textSize="14sp"
+                                android:textColor="#2C3329"/>
+                            <RadioButton
+                                android:id="@+id/rbUsoFamiliar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="false"
+                                android:clickable="false"/>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón Continuar / Empezar -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFinalizarOnboarding"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="24dp"
+            android:text="Guardar y empezar  →"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:cornerRadius="14dp"
+            app:backgroundTint="#4F6342"/>
+
+    </LinearLayout>
+</ScrollView>

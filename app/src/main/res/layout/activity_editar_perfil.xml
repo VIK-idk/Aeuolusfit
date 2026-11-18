@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAF9F4"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Cabecera: < Familia y AeolusFit -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvVolverFamilia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="‹  Familia"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#4F6342"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/sello"
+                    app:tint="#4F6342"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="AeolusFit"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="#4F6342"/>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Título y Subtítulo dinámico -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Editar perfil"
+            android:fontFamily="serif"
+            android:textSize="34sp"
+            android:textColor="#2C3329"/>
+
+        <TextView
+            android:id="@+id/tvSubtituloEditarPerfil"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Pequeños detalles para cuidar de ti."
+            android:textSize="15sp"
+            android:textColor="#686D65"/>
+
+        <!-- Tarjeta Superior de Resumen del Perfil -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="#EAEFE5"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
+                    app:cardCornerRadius="34dp"
+                    app:cardBackgroundColor="#F2E6DF"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:id="@+id/tvAvatarInicialEditar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="—"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="#2C3329"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvHeaderNombreEditar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nombre"
+                        android:textStyle="bold"
+                        android:textSize="22sp"
+                        android:textColor="#2C3329"/>
+
+                    <TextView
+                        android:id="@+id/tvHeaderEdadEditar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Edad sin definir"
+                        android:textSize="14sp"
+                        android:textColor="#686D65"/>
+
+                    <TextView
+                        android:id="@+id/tvHeaderSensacionEditar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="❄️  Suele tener frío"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:textColor="#4F6342"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Tarjeta del Formulario -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="24dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#E0E0E0"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Campo Nombre -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nombre"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"
+                    android:layout_marginBottom="6dp"/>
+
+                <EditText
+                    android:id="@+id/etNombrePerfilEditar"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:background="@android:drawable/editbox_background_normal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:hint="Introduce el nombre"
+                    android:inputType="textPersonName"
+                    android:textColor="#2C3329"/>
+
+                <!-- Campo Edad aproximada -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Edad aproximada"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"
+                    android:layout_marginBottom="6dp"/>
+
+                <EditText
+                    android:id="@+id/etEdadPerfilEditar"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:background="@android:drawable/editbox_background_normal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:hint="Introduce la edad en años (ej. 28)"
+                    android:inputType="number"
+                    android:textColor="#2C3329"/>
+
+                <!-- Selector: ¿Cómo suele sentir el tiempo? -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="¿Cómo suele sentir el tiempo?"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#2C3329"
+                    android:layout_marginBottom="10dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <!-- Botón Siente frío -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardOpcionFrio"
+                        android:layout_width="0dp"
+                        android:layout_height="84dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="6dp"
+                        app:cardBackgroundColor="#EAEFE5"
+                        app:cardCornerRadius="16dp"
+                        app:strokeWidth="1.5dp"
+                        app:strokeColor="#4F6342"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="❄️"
+                                android:textSize="18sp"/>
+                            <TextView
+                                android:id="@+id/tvLabelFrio"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Siente frío"
+                                android:textStyle="bold"
+                                android:textSize="14sp"
+                                android:textColor="#4F6342"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Botón Siente calor -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardOpcionCalor"
+                        android:layout_width="0dp"
+                        android:layout_height="84dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="#D4D6CF"
+                        app:cardElevation="0dp"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="☀️"
+                                android:textSize="18sp"/>
+                            <TextView
+                                android:id="@+id/tvLabelCalor"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="Siente calor"
+                                android:textSize="14sp"
+                                android:textColor="#686D65"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Tendremos en cuenta esta preferencia al recomendarle qué ponerse."
+                    android:textSize="12sp"
+                    android:textColor="#686D65"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Botón Guardar cambios -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGuardarPerfilFamiliar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="20dp"
+            android:text="Guardar cambios"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            app:cornerRadius="14dp"
+            app:backgroundTint="#4F6342"/>
+
+        <!-- Botón Eliminar perfil -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAbrirModalEliminar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="10dp"
+            android:text="🗑️   Eliminar perfil"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#9E473B"
+            app:cornerRadius="14dp"
+            app:backgroundTint="#F4E9E6"/>
+
+    </LinearLayout>
+</ScrollView>

@@ -1,15 +1,12 @@
 package com.example.aeuolusfit;
 
-import android.content.Context;
+import android.app.Dialog;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,9 +19,11 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
@@ -34,76 +33,274 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class HoyFragment extends Fragment implements SensorEventListener {
+public class HoyFragment extends Fragment implements Aplicacion.OnClimaChangeListener {
 
     private RecyclerView rvPerfilesHoy;
     private AdaptadorPerfilesChip adaptadorPerfiles;
     private final List<Familiar> listaPerfiles = new ArrayList<>();
+    private final List<Prenda> listaPrendas = new ArrayList<>();
 
-    private TextView tvSaludo, tvTemperaturaHoy, tvHumedadHoy;
+    private TextView tvSaludo, tvUbicacionClima, tvTemperaturaHoy, tvHumedadHoy, tvEstadoClima;
+    private TextView tvMaxMinHoy, tvPronosticoTarde, tvAlertaTexto;
     private TextView tvParaUsuario, tvTituloConjunto, tvDescripcionConjunto;
     private TextView tvContadorPrendas, tvEstadoSensores;
+    private ExtendedFloatingActionButton fabFeedbackIA;
+
+    private final List<MensajeChat> mensajesConversacion = new ArrayList<>();
+    private AdaptadorChat adaptadorChat;
 
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
+    private Aplicacion appGlobal;
 
-    // Sensores (Unidad 7)
-    private SensorManager sensorManager;
-    private Sensor sensorTemp, sensorHumedad;
+    private Familiar familiarSeleccionado = null;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // En Fragments independientes configuramos las vistas en onCreateView (Ud2 - 2.8.1)
         View v = inflater.inflate(R.layout.fragment_hoy, container, false);
 
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        appGlobal = (Aplicacion) requireActivity().getApplication();
 
         tvSaludo = v.findViewById(R.id.tvSaludo);
+        tvUbicacionClima = v.findViewById(R.id.tvUbicacionClima);
         tvTemperaturaHoy = v.findViewById(R.id.tvTemperaturaHoy);
         tvHumedadHoy = v.findViewById(R.id.tvHumedadHoy);
+        tvEstadoClima = v.findViewById(R.id.tvEstadoClima);
+        tvMaxMinHoy = v.findViewById(R.id.tvMaxMinHoy);
+        tvPronosticoTarde = v.findViewById(R.id.tvPronosticoTarde);
+        tvAlertaTexto = v.findViewById(R.id.tvAlertaTexto);
         tvParaUsuario = v.findViewById(R.id.tvParaUsuario);
         tvTituloConjunto = v.findViewById(R.id.tvTituloConjunto);
         tvDescripcionConjunto = v.findViewById(R.id.tvDescripcionConjunto);
         tvContadorPrendas = v.findViewById(R.id.tvContadorPrendas);
         tvEstadoSensores = v.findViewById(R.id.tvEstadoSensores);
         rvPerfilesHoy = v.findViewById(R.id.rvPerfilesHoy);
+        fabFeedbackIA = v.findViewById(R.id.fabFeedbackIA);
 
         configurarSaludoYHora();
         configurarRecyclerViewPerfiles();
-        cargarPerfilesFirestore();
-        escucharContadorPrendas();
-        configurarSensores();
+        cargarSoloPerfilActivoYFamiliares();
+        escucharPrendasReales();
+        escucharModuloIoTFibestore();
 
-        // Intención implícita para compartir conjunto (Unidad 3 - 3.9)
+        onClimaActualizado();
+
+        // Botón Compartir (Unidad 3)
         ImageView btnCompartir = v.findViewById(R.id.btnCompartirConjunto);
         btnCompartir.setOnClickListener(view -> {
             Intent i = new Intent(Intent.ACTION_SEND);
             i.setType("text/plain");
-            i.putExtra(Intent.EXTRA_TEXT, "Mi conjunto AeolusFit de hoy (" + tvParaUsuario.getText() + "): "
-                    + tvTituloConjunto.getText() + " - " + tvDescripcionConjunto.getText());
-            startActivity(Intent.createChooser(i, "Compartir conjunto con..."));
+            i.putExtra(Intent.EXTRA_TEXT, "AeolusFit: " + tvTituloConjunto.getText() + " (" + tvTemperaturaHoy.getText() + ")");
+            startActivity(Intent.createChooser(i, "Compartir conjunto"));
         });
 
-        // Al pulsar la alerta de lluvia lanzamos una Notificación real (Unidad 6)
+        // Alerta de lluvia / Notificación (Unidad 6)
         MaterialCardView cardAlerta = v.findViewById(R.id.cardAlertaLluvia);
         cardAlerta.setOnClickListener(view -> {
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).lanzarNotificacionClimatica(
-                        "Alerta de Lluvia AeolusFit",
-                        "60% de probabilidad esta tarde. ¡No olvides tu paraguas!");
-                Toast.makeText(getContext(), "Recordatorio enviado a tus notificaciones", Toast.LENGTH_SHORT).show();
+                        "Alerta Climática AeolusFit",
+                        tvAlertaTexto.getText().toString());
+                Toast.makeText(getContext(), "Aviso enviado al centro de notificaciones", Toast.LENGTH_SHORT).show();
             }
         });
 
+        // Navegar a Armario
         MaterialButton btnVerConjunto = v.findViewById(R.id.btnVerConjunto);
         btnVerConjunto.setOnClickListener(view -> {
-            // Navegar a la pestaña de Armario (posición 2 del ViewPager2)
             ViewPager2 vp = requireActivity().findViewById(R.id.viewpager);
             vp.setCurrentItem(2, true);
         });
 
+        // Botón flotante para interactuar con la IA sobre sensaciones y meteorología
+        fabFeedbackIA.setOnClickListener(view -> mostrarDialogoFeedback());
+
         return v;
+    }
+
+    private void mostrarDialogoFeedback() {
+        if (familiarSeleccionado == null) return;
+
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialog_chat_ia);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, (int) (getResources().getDisplayMetrics().heightPixels * 0.85));
+        }
+
+        TextView tvTitulo = dialog.findViewById(R.id.tvTituloChatIA);
+        TextView tvSubtitulo = dialog.findViewById(R.id.tvSubtituloChatIA);
+        RecyclerView rvChat = dialog.findViewById(R.id.rvMensajesChat);
+        EditText etInput = dialog.findViewById(R.id.etMensajeChat);
+        View btnEnviar = dialog.findViewById(R.id.btnEnviarMensajeChat);
+        TextView tvPensando = dialog.findViewById(R.id.tvEstadoEscribiendo);
+
+        tvTitulo.setText("Hablando con " + familiarSeleccionado.getNombre());
+        tvSubtitulo.setText("T: " + tvTemperaturaHoy.getText() + " · " + familiarSeleccionado.getSensacionTermica());
+
+        mensajesConversacion.clear();
+        rvChat.setLayoutManager(new LinearLayoutManager(getContext()));
+        adaptadorChat = new AdaptadorChat(mensajesConversacion);
+        rvChat.setAdapter(adaptadorChat);
+
+        // Cargar historial persistido en Firestore
+        if (currentUser != null) {
+            db.collection("usuarios").document(currentUser.getUid())
+                    .collection("familiares").document(familiarSeleccionado.getId())
+                    .collection("mensajesChat")
+                    .orderBy("timestamp", Query.Direction.ASCENDING)
+                    .limit(20)
+                    .get()
+                    .addOnSuccessListener(snapshots -> {
+                        if (snapshots != null && !snapshots.isEmpty()) {
+                            mensajesConversacion.clear();
+                            for (QueryDocumentSnapshot doc : snapshots) {
+                                String txt = doc.getString("texto");
+                                Boolean esUsr = doc.getBoolean("esUsuario");
+                                Long ts = doc.getLong("timestamp");
+                                String hora = ts != null ? new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date(ts)) : "";
+                                mensajesConversacion.add(new MensajeChat(txt, Boolean.TRUE.equals(esUsr), hora));
+                            }
+                            adaptadorChat.notifyDataSetChanged();
+                            rvChat.scrollToPosition(mensajesConversacion.size() - 1);
+                        } else {
+                            // Mensaje inicial contextual si no existen registros previos
+                            String hora = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+                            mensajesConversacion.add(new MensajeChat(
+                                    "¡Hola " + familiarSeleccionado.getNombre() + "! Hoy tenemos " + tvTemperaturaHoy.getText() + ". ¿Tienes alguna duda sobre el tiempo o cómo te sentiste con la ropa?",
+                                    false,
+                                    hora
+                            ));
+                            adaptadorChat.notifyDataSetChanged();
+                        }
+                    });
+        }
+
+        dialog.findViewById(R.id.btnCerrarChat).setOnClickListener(x -> dialog.dismiss());
+
+        btnEnviar.setOnClickListener(v -> {
+            String texto = etInput.getText().toString().trim();
+            if (texto.isEmpty()) return;
+
+            String hora = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+            mensajesConversacion.add(new MensajeChat(texto, true, hora));
+            adaptadorChat.notifyItemInserted(mensajesConversacion.size() - 1);
+            rvChat.scrollToPosition(mensajesConversacion.size() - 1);
+
+            etInput.setText("");
+            tvPensando.setVisibility(View.VISIBLE);
+            btnEnviar.setEnabled(false);
+
+            // 1. Guardar mensaje del usuario en Firestore
+            RecomendadorHibridoIA.guardarMensajeEnFirestore(familiarSeleccionado.getId(), texto, true);
+
+            // 2. Invocar al motor con el contexto del chat
+            RecomendadorHibridoIA.conversarConIA(familiarSeleccionado, texto, appGlobal, mensajesConversacion, respuestaIA -> {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        tvPensando.setVisibility(View.GONE);
+                        btnEnviar.setEnabled(true);
+                        String horaIA = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+                        mensajesConversacion.add(new MensajeChat(respuestaIA, false, horaIA));
+                        adaptadorChat.notifyItemInserted(mensajesConversacion.size() - 1);
+                        rvChat.smoothScrollToPosition(mensajesConversacion.size() - 1);
+                    });
+                }
+            });
+        });
+
+        dialog.show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        appGlobal.registrarListener(this);
+        onClimaActualizado();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        appGlobal.desregistrarListener(this);
+    }
+
+    @Override
+    public void onClimaActualizado() {
+        if (getActivity() == null) return;
+        getActivity().runOnUiThread(() -> {
+            Double temp = appGlobal.getTemperaturaActual();
+            Double hum = appGlobal.getHumedadActual();
+
+            if (temp != null) {
+                tvTemperaturaHoy.setText(Math.round(temp) + " °C");
+            } else {
+                tvTemperaturaHoy.setText("— °C");
+            }
+
+            if (hum != null) {
+                tvHumedadHoy.setText("💧 Humedad: " + Math.round(hum) + " %");
+            } else {
+                tvHumedadHoy.setText("💧 Humedad: — %");
+            }
+
+            tvUbicacionClima.setText(appGlobal.getCiudadActual() + " · Ahora");
+            tvEstadoClima.setText(appGlobal.getEstadoCielo());
+
+            if (appGlobal.getMaxTemp() != 0 || appGlobal.getMinTemp() != 0) {
+                tvMaxMinHoy.setText("Máx. " + appGlobal.getMaxTemp() + "° · Mín. " + appGlobal.getMinTemp() + "°");
+            }
+            tvPronosticoTarde.setText("🌧️ Tarde · " + appGlobal.getProbLluviaTarde() + " %");
+            tvAlertaTexto.setText(appGlobal.getConsejoLluvia());
+
+            if (familiarSeleccionado != null) {
+                solicitarRecomendacion(familiarSeleccionado);
+            }
+        });
+    }
+
+    private void escucharModuloIoTFibestore() {
+        if (currentUser == null) return;
+
+        // Escucha en tiempo real de la colección global alimentada por la Raspberry Pi
+        db.collection("dispositivos_iot").document("M001")
+                .addSnapshotListener((doc, e) -> {
+                    if (e != null) {
+                        return;
+                    }
+
+                    if (doc != null && doc.exists()) {
+                        Double temp = doc.getDouble("temperatura");
+                        Double hum = doc.getDouble("humedad");
+                        Boolean conectado = doc.getBoolean("conectado");
+                        Boolean puertaAbierta = doc.getBoolean("puertaAbierta");
+                        Boolean presencia = doc.getBoolean("presencia");
+
+                        // 1. Actualizar datos en la aplicación (AppGlobal)
+                        if (Boolean.TRUE.equals(conectado) && temp != null && hum != null) {
+                            if (appGlobal != null) {
+                                appGlobal.actualizarDesdeHardware(temp, hum);
+                            }
+                        }
+
+                        // 2. Actualizar tu texto de estado en la interfaz
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (tvEstadoSensores != null) {
+                                    if (Boolean.TRUE.equals(puertaAbierta)) {
+                                        tvEstadoSensores.setText("Armario ABIERTO" + (Boolean.TRUE.equals(presencia) ? " · Usuario detectado" : ""));
+                                    } else {
+                                        String horaActual = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(new java.util.Date());
+                                        tvEstadoSensores.setText("Sensores sincronizados a las " + horaActual);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
     }
 
     private void configurarSaludoYHora() {
@@ -113,7 +310,7 @@ public class HoyFragment extends Fragment implements SensorEventListener {
         else tvSaludo.setText("¡Buenas noches!");
 
         String horaActual = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        tvEstadoSensores.setText("Sensores actualizados a las " + horaActual);
+        tvEstadoSensores.setText("Sensores sincronizados a las " + horaActual);
     }
 
     private void configurarRecyclerViewPerfiles() {
@@ -121,135 +318,120 @@ public class HoyFragment extends Fragment implements SensorEventListener {
         rvPerfilesHoy.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         adaptadorPerfiles = new AdaptadorPerfilesChip(listaPerfiles);
 
-        adaptadorPerfiles.setOnItemClickListener(v -> {
-            int pos = rvPerfilesHoy.getChildAdapterPosition(v);
-            if (pos != RecyclerView.NO_POSITION) {
-                for (int i = 0; i < listaPerfiles.size(); i++) {
-                    listaPerfiles.get(i).setSeleccionado(i == pos);
-                }
-                adaptadorPerfiles.notifyDataSetChanged();
-                calcularConjuntoEnHiloSecundario(listaPerfiles.get(pos), pos);
-            }
+        adaptadorPerfiles.setOnPerfilClickListener((familiar, posicion) -> {
+            familiarSeleccionado = familiar;
+            tvParaUsuario.setText("• Para " + familiar.getNombre());
+            fabFeedbackIA.setText("¿Cómo se sintió " + familiar.getNombre() + "?");
+            solicitarRecomendacion(familiar);
         });
 
         rvPerfilesHoy.setAdapter(adaptadorPerfiles);
     }
 
-    // Cálculo en un Hilo secundario usando Thread y runOnUiThread (Unidad 7 - 7.2.3)
-    private void calcularConjuntoEnHiloSecundario(Familiar familiar, int indice) {
-        new Thread(() -> {
-            String titulo;
-            String desc;
-            if (indice % 3 == 0) {
-                titulo = "Camiseta, pantalón largo y chaqueta ligera";
-                desc = "Capas suaves para un día fresco.";
-            } else if (indice % 3 == 1) {
-                titulo = "Camisa oxford, vaqueros y chubasquero";
-                desc = "Cómodo y protegido para la lluvia de la tarde.";
-            } else {
-                titulo = "Sudadera térmica, pantalón cómodo y botas";
-                desc = "Ideal para moverse con libertad sin pasar frío.";
-            }
-
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    tvParaUsuario.setText("• Para " + familiar.getNombre());
-                    tvTituloConjunto.setText(titulo);
-                    tvDescripcionConjunto.setText(desc);
-                });
-            }
-        }).start();
-    }
-
-    private void cargarPerfilesFirestore() {
+    private void cargarSoloPerfilActivoYFamiliares() {
         if (currentUser == null) return;
         String uid = currentUser.getUid();
 
-        db.collection("usuarios").document(uid).get().addOnSuccessListener(doc -> {
-            String nombrePrincipal = "Lucía";
-            if (doc.exists() && doc.getString("nombre") != null && !doc.getString("nombre").isEmpty()) {
-                nombrePrincipal = doc.getString("nombre").split(" ")[0];
-            } else if (currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty()) {
-                nombrePrincipal = currentUser.getDisplayName().split(" ")[0];
+        db.collection("usuarios").document(uid).addSnapshotListener((doc, error) -> {
+            String nombreTitular = "Tú";
+            int edadTitular = 0;
+            String sensacionTitular = "Suele tener frío";
+            String tipoUsoTitular = "personal";
+            List<String> memoriaTitular = new ArrayList<>();
+            String ultTitular = null;
+            String ultDescTitular = null;
+
+            if (doc != null && doc.exists()) {
+                if (doc.getString("nombre") != null && !doc.getString("nombre").trim().isEmpty()) {
+                    nombreTitular = doc.getString("nombre").split(" ")[0];
+                } else if (currentUser.getDisplayName() != null && !currentUser.getDisplayName().trim().isEmpty()) {
+                    nombreTitular = currentUser.getDisplayName().split(" ")[0];
+                }
+
+                Long edadDoc = doc.getLong("edad");
+                if (edadDoc != null) edadTitular = edadDoc.intValue();
+
+                String sensDoc = doc.getString("sensacionTermica");
+                if (sensDoc != null && !sensDoc.isEmpty()) sensacionTitular = sensDoc;
+
+                String usoDoc = doc.getString("tipoUsoArmario");
+                if (usoDoc != null && !usoDoc.isEmpty()) tipoUsoTitular = usoDoc;
+
+                List<String> histDoc = (List<String>) doc.get("historialMemoriaIA");
+                if (histDoc != null) memoriaTitular = histDoc;
+
+                ultTitular = doc.getString("ultimoTituloConjunto");
+                ultDescTitular = doc.getString("ultimaDescripcionConjunto");
             }
 
-            final String nombreFinal = nombrePrincipal;
+            final Familiar titular = new Familiar("titular", nombreTitular, "Titular", "#E8CEBF", true, edadTitular, sensacionTitular);
+            titular.setTipoUso(tipoUsoTitular);
+            titular.setHistorialMemoriaIA(memoriaTitular);
+            titular.setUltimoTituloConjunto(ultTitular);
+            titular.setUltimaDescripcionConjunto(ultDescTitular);
 
-            // Escuchar familiares añadidos en Firestore en tiempo real
             db.collection("usuarios").document(uid).collection("familiares")
                     .addSnapshotListener((snapshots, e) -> {
                         listaPerfiles.clear();
-                        listaPerfiles.add(new Familiar("principal", nombreFinal, "Principal", "#E8CEBF", true));
+                        listaPerfiles.add(titular);
 
-                        if (snapshots != null && !snapshots.isEmpty()) {
-                            for (QueryDocumentSnapshot document : snapshots) {
-                                Familiar fam = document.toObject(Familiar.class);
-                                fam.setSeleccionado(false);
-                                listaPerfiles.add(fam);
+                        if (snapshots != null) {
+                            for (QueryDocumentSnapshot d : snapshots) {
+                                Familiar f = d.toObject(Familiar.class);
+                                f.setId(d.getId());
+                                f.setSeleccionado(false);
+                                listaPerfiles.add(f);
                             }
-                        } else {
-                            // Perfiles del diseño Hi-Fi por defecto si aún no ha creado familiares
-                            listaPerfiles.add(new Familiar("pablo", "Pablo", "Pareja", "#D9E2D5", false));
-                            listaPerfiles.add(new Familiar("emma", "Emma", "Hija", "#EDE3CE", false));
                         }
                         adaptadorPerfiles.notifyDataSetChanged();
-                        tvParaUsuario.setText("• Para " + nombreFinal);
+
+                        if (familiarSeleccionado == null) {
+                            familiarSeleccionado = titular;
+                            tvParaUsuario.setText("• Para " + titular.getNombre());
+                            fabFeedbackIA.setText("¿Cómo se sintió " + titular.getNombre() + "?");
+                            solicitarRecomendacion(titular);
+                        }
                     });
         });
     }
 
-    private void escucharContadorPrendas() {
+    private void solicitarRecomendacion(Familiar familiar) {
+        if (familiar.getUltimoTituloConjunto() != null && !familiar.getUltimoTituloConjunto().isEmpty()) {
+            tvTituloConjunto.setText(familiar.getUltimoTituloConjunto());
+            tvDescripcionConjunto.setText(familiar.getUltimaDescripcionConjunto());
+        }
+
+        RecomendadorHibridoIA.obtenerRecomendacion(familiar, appGlobal, listaPrendas, (titulo, descripcion, esDesdeIA) -> {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    tvTituloConjunto.setText(titulo);
+                    tvDescripcionConjunto.setText(descripcion);
+                });
+            }
+        });
+    }
+
+    private void escucharPrendasReales() {
         if (currentUser == null) return;
         db.collection("prendas")
                 .whereEqualTo("uidUsuario", currentUser.getUid())
                 .addSnapshotListener((snapshots, error) -> {
+                    listaPrendas.clear();
                     if (snapshots != null) {
-                        int total = snapshots.size();
-                        tvContadorPrendas.setText("Armario al día · " + (total > 0 ? total : 48) + " prendas");
+                        for (QueryDocumentSnapshot d : snapshots) {
+                            listaPrendas.add(d.toObject(Prenda.class));
+                        }
+                        int total = listaPrendas.size();
+                        if (total == 0) {
+                            tvContadorPrendas.setText("Armario al día · 0 prendas");
+                        } else {
+                            tvContadorPrendas.setText("Armario al día · " + total + " prendas");
+                        }
+
+                        if (familiarSeleccionado != null) {
+                            solicitarRecomendacion(familiarSeleccionado);
+                        }
                     }
                 });
     }
-
-    // Gestión de Sensores (Unidad 7 - 7.1)
-    private void configurarSensores() {
-        if (getContext() != null) {
-            sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-            if (sensorManager != null) {
-                List<Sensor> listaTemp = sensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE);
-                if (!listaTemp.isEmpty()) sensorTemp = listaTemp.get(0);
-
-                List<Sensor> listaHum = sensorManager.getSensorList(Sensor.TYPE_RELATIVE_HUMIDITY);
-                if (!listaHum.isEmpty()) sensorHumedad = listaHum.get(0);
-            }
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (sensorManager != null) {
-            if (sensorTemp != null) sensorManager.registerListener(this, sensorTemp, SensorManager.SENSOR_DELAY_UI);
-            if (sensorHumedad != null) sensorManager.registerListener(this, sensorHumedad, SensorManager.SENSOR_DELAY_UI);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (sensorManager != null) {
-            sensorManager.unregisterListener(this);
-        }
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-            tvTemperaturaHoy.setText(Math.round(event.values[0]) + " °C");
-        } else if (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
-            tvHumedadHoy.setText("💧 Humedad relativa: " + Math.round(event.values[0]) + " %");
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 }

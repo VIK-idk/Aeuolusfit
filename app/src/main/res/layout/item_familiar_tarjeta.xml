@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="20dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="#E0E0E0"
+    app:cardElevation="0dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAvatarFamilia"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:cardCornerRadius="26dp"
+            app:cardBackgroundColor="#E8CEBF"
+            app:cardElevation="0dp"
+            android:layout_centerVertical="true">
+            <TextView
+                android:id="@+id/tvInicialFamiliarItem"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="L"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="#2C3329"/>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/cardAvatarFamilia"
+            android:layout_marginStart="14dp"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvNombreFamiliarItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Laura"
+                android:textStyle="bold"
+                android:textSize="17sp"
+                android:textColor="#2C3329"/>
+
+            <TextView
+                android:id="@+id/tvEdadFamiliarItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="35 años aprox."
+                android:textSize="13sp"
+                android:textColor="#686D65"/>
+
+            <TextView
+                android:id="@+id/tvSensacionFamiliarItem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="❄️ Suele tener frío"
+                android:textSize="12sp"
+                android:textColor="#4F6342"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:text="›"
+            android:textSize="22sp"
+            android:textColor="#686D65"/>
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>
